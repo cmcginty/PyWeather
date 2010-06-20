@@ -13,15 +13,28 @@
 #
 # $Id: $
 
+import os
 from distutils.core import setup
 
-import weather
+import weather as pkg
+name = pkg.__name__
 
-setup(name = "weather",
-      version = weather.__version__,
+def _read( *path_name ):
+   return open( os.path.join(os.path.dirname(__file__), *path_name)).read()
+
+setup(name = name,
+      version = pkg.__version__,
       license = "GNU GPL",
-      description = weather.__doc__,
-      author = "Christopher Blunck",
-      author_email = "chris@wxnet.org",
+      description = pkg.__doc__,
+      long_description=_read('README'),
+      author = "Patrick C. McGinty, Christopher Blunck",
+      author_email = "pyweather@tuxcoder.com, chris@wxnet.org",
       url = "http://oss.wxnet.org/pyweather",
-      packages= [ "weather", "weather.units", "weather.stations", "weather.services" ])
+      download_url = "",
+      packages= [
+         name,
+         name+'.services',
+         name+'.stations',
+         name+'.units',
+      ],
+   )

@@ -1,0 +1,15 @@
+Any one of the following command will install pyWeather. Make sure to run as
+   ``root`` user:
+
+   a. Use :command:`easy_install` from the `setuptools package
+      <http://peak.telecommunity.com/DevCenter/EasyInstall]>`_::
+
+         sudo easy_install weather
+
+   b. Download the source distribution file and install from the
+      command line::
+
+         tar xzf weather-*.tar.gz
+         cd weather-*
+         sudo make install
+

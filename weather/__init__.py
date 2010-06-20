@@ -1,4 +1,5 @@
 __version__ = '0.7.0'
 
-__doc__ = ''' a collection of meteorological conversion functions, station
-readers, and publishing modules'''
+__doc__ = '''PyWeather branch; download real-time data from Davis Vantage Pro
+weather stations, upload weather data to sites (e.g. wunderground.com), and
+various meteorological conversion functions.'''
