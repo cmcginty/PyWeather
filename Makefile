@@ -5,7 +5,7 @@
 
 
 NAME=weather
-VER=0.7.0
+VER=0.7.1
 DIST_DIR=dist
 TAR=${DIST_DIR}/${NAME}-${VER}.tar.gz
 SRC_DIR=${DIST_DIR}/${NAME}-${VER}
