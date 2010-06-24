@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 __doc__ = '''
 
 WUnderground.com Publisher
@@ -17,7 +19,7 @@ seconds between observations.
 
 Usage:
 >>> publisher = Publisher()
->>> publisher.set(30.12, 28.52, 53.0, 44.6, 0.0, time.gmtime(), 0, 0, 0) 
+>>> publisher.set(30.12, 28.52, 53.0, 44.6, 0.0, time.gmtime(), 0, 0, 0)
 >>> response = publisher.publish('MyUserName', 'MyPassword')
 >>> print '%s: %s' % (response.status, response.reason)
 
@@ -40,9 +42,15 @@ Author: Christopher Blunck (chris@wxnet.org)
 Date: 2006-03-27
 '''
 
+import logging
+log = logging.getLogger(__name__)
+
+
+class PublishException(Exception): pass
+
 
 class Publisher:
-    ''' 
+    '''
     Publishes weather data to the wunderground.com servers.  See
     module documentation for additional information and usage idioms.
     '''
@@ -55,35 +63,52 @@ class Publisher:
         self.args = {}
         self.rtfreq = rtfreq
 
-    def set(self, pressure, dewpoint, humidity, tempf, rainin, dateutc, 
-            windgust, windspeed, winddir, clouds='NA', weather='NA'):
+    def set(self, pressure='NA', dewpoint='NA', humidity='NA', tempf='NA',
+            rainin='NA', rainday='NA', dateutc='NA', windgust='NA',
+            windgustdir='NA', windspeed='NA', winddir='NA',
+            clouds='NA', weather='NA'):
+
         self.args['baromin'] = pressure
         self.args['dewptf'] = dewpoint
         self.args['humidity'] = humidity
         self.args['tempf'] = tempf
         self.args['rainin'] = rainin
+        self.args['dailyrainin'] = rainday
         self.args['dateutc'] = dateutc
         self.args['windgustmph'] = windgust
-        self.args['windspeed'] = windspeed
+        self.args['windgustdir'] = windgustdir
+        self.args['windspeedmph'] = windspeed
         self.args['winddir'] = winddir
         self.args['clouds'] = clouds
         self.args['weather'] = weather
+        self.args = dict((k,v) for k,v in self.args.items() if v != 'NA')
+        log.debug( self.args )
 
     def _publish(self, user, passwd, args, server, uri, debug):
         from httplib import HTTPConnection
         from urllib import urlencode
 
         uri = uri + "?" + urlencode(args)
-        
+
         if debug:
             print 'Connect to: http://%s' % server
             print 'GET %s' % uri
             print '\nFull URL: http://%s%s' % (server, uri)
 
-        conn = HTTPConnection(server)
+        conn = HTTPConnection(server, timeout=5)
+        if not conn:
+            raise PublishException('Remote server connection timeout')
         conn.request("GET", uri)
 
-        return conn.getresponse()
+        http = conn.getresponse()
+        data = (http.status, http.reason, http.read())
+        conn.close()
+        if not (data[0] == 200 and
+                data[1] == 'OK' and
+                data[2].find('success') >= 0):
+            raise PublishException('Server returned invalid status: %d %s %s'
+                    % data)
+        return data
 
 
     def publish(self, username, password, debug=False):
@@ -97,7 +122,9 @@ class Publisher:
             self.args['realtime'] = 1
             self.args['rtfreq'] = self.rtfreq
             server = Publisher.REALTIME_SERVER
-        
+
         uri = Publisher.URI
         return self._publish(username, password, self.args, server, uri, debug)
 
+
+# vim: sts=4:ts=4:sw=4
