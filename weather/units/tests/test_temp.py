@@ -8,9 +8,11 @@
 # -Christopher Blunck
 #
 
+from __future__ import absolute_import
+
 import unittest
 
-from temp import *
+from ..temp import *
 
 __author__ = 'Christopher Blunck'
 __email__ = 'chris@wxnet.org'
@@ -49,7 +51,7 @@ class TestCase(unittest.TestCase):
 
 
     def test__calc_wind_chill(self):
-        # make sure some hard-coded values work        
+        # make sure some hard-coded values work
         assert int(calc_wind_chill(80, 10)) == 83, "value not correct"
         assert int(calc_wind_chill(32, 10)) == 23, "value not correct"
         assert int(calc_wind_chill(-20, 5)) == -34, "value not correct"

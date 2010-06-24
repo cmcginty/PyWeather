@@ -8,9 +8,11 @@
 # -Christopher Blunck
 #
 
+from __future__ import absolute_import
+
 import unittest
 
-from pressure import *
+from ..pressure import *
 
 __author__ = 'Christopher Blunck'
 __email__ = 'chris@wxnet.org'
@@ -69,7 +71,7 @@ class TestCase(unittest.TestCase):
 
 
     def test__atm_to_lb_sqin(self):
-        # make sure some hard-coded values work        
+        # make sure some hard-coded values work
         assert round(atm_to_lb_sqin(1.0364), 4) == 15.2309, "value not correct"
         assert round(atm_to_lb_sqin(1.0000), 4) == 14.6960, "value not correct"
         assert round(atm_to_lb_sqin(0.9268), 4) == 13.6203, "value not correct"
@@ -77,7 +79,7 @@ class TestCase(unittest.TestCase):
 
 
     def test__in32_to_mb(self):
-        # make sure some hard-coded values work        
+        # make sure some hard-coded values work
         assert int(in32_to_mb(31.01)) == 1050, "value not correct"
         assert int(in32_to_mb(29.92)) == 1013, "value not correct"
         assert int(in32_to_mb(27.73)) == 939, "value not correct"
@@ -147,7 +149,7 @@ class TestCase(unittest.TestCase):
         assert round(mb_to_in32(939), 4) == 27.7287, "value not correct"
         assert round(mb_to_in32(900), 4) == 26.5770, "value not correct"
 
-        
+
     def test__mb_to_in60(self):
         # make sure some hard-coded values work
         assert round(mb_to_in60(1050), 4) == 31.0905, "value not correct"

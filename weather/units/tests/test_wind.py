@@ -8,9 +8,11 @@
 # -Christopher Blunck
 #
 
+from __future__ import absolute_import
+
 import unittest
 
-from wind import *
+from ..wind import *
 
 __author__ = 'Christopher Blunck'
 __email__ = 'chris@wxnet.org'
@@ -146,7 +148,7 @@ class TestCase(unittest.TestCase):
         assert round(mph_to_m_sec(16), 4) == 7.1526, "value not correct"
         assert round(mph_to_m_sec(40), 4) == 17.8816, "value not correct"
         assert round(mph_to_m_sec(80), 4) == 35.7632, "value not correct"
-        
+
 
     def test__ft_min_to_mph(self):
         # make sure some hard-coded values work
