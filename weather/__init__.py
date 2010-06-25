@@ -1,8 +1,10 @@
-__version__ = '0.8'
+'''
+PyWeather branch; bindings for Davis Vantage Pro and Pro2 weather stations,
+upload of weather data (e.g. wunderground.com), and meteorological
+calculation/conversion functions.
+'''
 
-__doc__ = '''PyWeather branch; bindings for Davis Vantage Pro I/II weather
-stations, upload of weather data (e.g. wunderground.com), and meteorological
-calculation/conversion functions.'''
+__version__ = '0.8'
 
 import logging
 

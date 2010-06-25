@@ -1,9 +1,10 @@
 '''
-Davis Vantage Pro I/II Service
+Davis Vantage Pro and Pro2 Service
 
 Abstract:
-Allows data query of Davis Vantage Pro I/II devices via serial port interface.
-The primary implemented serial commands supported are LOOP and DMPAFT.
+Allows data query of Davis Vantage Pro and Pro2 devices via serial port
+interface.  The primary implemented serial commands supported are LOOP and
+DMPAFT.
 
 The LOOP command can aquire all real-time data points. The DMPAFT command is
 used to aquire periodic high/low data.

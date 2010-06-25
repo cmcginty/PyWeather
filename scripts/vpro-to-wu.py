@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
-#  PyWeather example script for reading Davis Vantage Pro I/II data and
-#  uploading to the WeatherUnderground.com Personal Weather Station (PWS) site.
+#  PyWeather example script for reading Davis Vantage Pro(2) data and uploading
+#  to the WeatherUnderground.com Personal Weather Station (PWS) site.
 #
 #  Author:  Patrick C. McGinty
 #  Email:   pyweather@tuxcoder.com
