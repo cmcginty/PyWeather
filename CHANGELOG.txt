@@ -1,6 +1,18 @@
 .. pyweather // (c) 2010, Patrick C. McGinty
    pyweather[@]tuxcoder[dot]com
 
+
+v0.8
+========
+:Release Date: 6/25/10
+
+* Add support for VantagePro CRC
+* Add support for VantagePro DMPAFT command
+* Misc fixes for VantagePro class
+* Misc fixes for Wunderground Publisher class
+* Add vpro-to-wu.py script for uploading Davis Vantage Pro data to
+  wunderground.com
+
 v0.7.1
 ========
 :Release Date: 6/24/10
