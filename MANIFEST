@@ -4,11 +4,12 @@ INSTALL.txt
 Makefile
 README
 setup.py
+scripts/vpro-to-wu.py
 weather/__init__.py
 weather/services/__init__.py
-weather/services/test.py
 weather/services/wunderground.py
 weather/stations/__init__.py
+weather/stations/_struct.py
 weather/stations/davis.py
 weather/stations/validate.py
 weather/units/__init__.py
@@ -16,7 +17,4 @@ weather/units/astro.py
 weather/units/precip.py
 weather/units/pressure.py
 weather/units/temp.py
-weather/units/test_pressure.py
-weather/units/test_temp.py
-weather/units/test_wind.py
 weather/units/wind.py

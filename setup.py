@@ -37,4 +37,5 @@ setup(name = name,
          name+'.stations',
          name+'.units',
       ],
+      scripts= [ 'scripts/vpro-to-wu.py' ],
    )
