@@ -29,7 +29,7 @@ setup(name = name,
       long_description=_read('README'),
       author = "Patrick C. McGinty, Christopher Blunck",
       author_email = "pyweather@tuxcoder.com, chris@wxnet.org",
-      url = "http://oss.wxnet.org/pyweather",
+      url = "http://github.com/cmcginty/PyWeather",
       download_url = "",
       packages= [
          name,

@@ -1,6 +1,13 @@
 .. PyWeather // (c) 2010, Patrick C. McGinty
    pyweather[@]tuxcoder[dot]com
 
+v0.8.1
+======
+:Release Date: 7/1/10
+
+* Add id/password params to vpro-to-wu.py script
+* Add update delay param to vpro-to-wu.py script
+* Add TTY device selector to vpro-to-wu.py script
 
 v0.8
 ========
