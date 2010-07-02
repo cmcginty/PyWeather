@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# pyweather
+# PyWeather
 # (c) 2005 Christopher Blunck <chris@wxnet.org>
 #
 # You're welcome to redistribute this software under the

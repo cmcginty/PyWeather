@@ -1,4 +1,4 @@
-# Makefile for installing and testing pyWeather
+# Makefile for installing and testing PyWeather
 #
 # Author: 	Patrick C. McGinty
 # Date: 		Thursday, June 10 2010

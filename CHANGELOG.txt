@@ -1,4 +1,4 @@
-.. pyweather // (c) 2010, Patrick C. McGinty
+.. PyWeather // (c) 2010, Patrick C. McGinty
    pyweather[@]tuxcoder[dot]com
 
 

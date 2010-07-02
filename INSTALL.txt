@@ -1,4 +1,4 @@
-Any one of the following command will install pyWeather. Make sure to run as
+Any one of the following command will install PyWeather. Make sure to run as
    ``root`` user:
 
    a. Use :command:`easy_install` from the `setuptools package
