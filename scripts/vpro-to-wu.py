@@ -12,25 +12,20 @@ Periodically read data from a local weather station and upload to the
 Weather Underground PWS site.
 """
 
+import os
 import sys
 import time
 import logging
+import optparse
 
 import weather.stations
 import weather.services
 
 log = logging.getLogger('')
 
-# wunderground.com login credentials
-PWS_ID   = ''
-PASSWORD = ''
-# serial device
-DEVICE   = '/dev/ttyS0'
-
-UPDATE_PER        = 15  # seconds between updates
 ARCHIVE_PER       = 10  # intervals (in minutes) between each archive record
-GUST_UPDATE_PER   = 5  # minutes to report last gust reading
-GUST_MPH_MIN      = 6   # minimum mph of gust above avg wind speed to report
+GUST_UPDATE_PER   = 10  # minutes to report last gust reading
+GUST_MPH_MIN      = 7   # minimum mph of gust above avg wind speed to report
 
 
 class NoSensorException(Exception): pass
@@ -43,7 +38,7 @@ class WindGust(object):
       self.value = self.NO_VALUE
       self.count = 0
 
-   def get( self, station ):
+   def get( self, station, delay ):
       '''
       return gust data, if above threshold value and current time is inside
       reporting window period
@@ -54,7 +49,7 @@ class WindGust(object):
          threshold = station.fields['WindSpeed10Min'] + GUST_MPH_MIN
          if rec['WindHi'] >= threshold:
             self.value = (rec['WindHi'],rec['WindHiDir'])
-            self.count = GUST_UPDATE_PER * 60 / UPDATE_PER
+            self.count = GUST_UPDATE_PER * 60 / delay
          else:
             self.value = self.NO_VALUE
 
@@ -69,7 +64,7 @@ class WindGust(object):
 WindGust = WindGust()
 
 
-def weather_update(station,net):
+def weather_update(station,net,pwsid,password):
    '''
    main execution loop. query weather data and post to online service.
    '''
@@ -98,7 +93,7 @@ def weather_update(station,net):
          windgustdir = gust_dir, )
 
    # send to WeatherUnderground
-   net.publish( PWS_ID, PASSWORD )
+   net.publish( pwsid, password )
 
 
 def init_log( quiet, debug ):
@@ -121,36 +116,44 @@ def init_log( quiet, debug ):
          log.setLevel(logging.DEBUG)
 
 
-def get_options():
+def get_options(parser):
    '''
    read command line options to configure program behavior.
    '''
-   import optparse
-   parser = optparse.OptionParser()
    parser.add_option('-d', '--debug', dest='debug', action="store_true",
          default=False, help='enable verbose debug logging')
    parser.add_option('-q', '--quiet', dest='quiet', action="store_true",
          default=False, help='disable all console logging')
-   (options, args) = parser.parse_args()
-   return options
+   parser.add_option('-t', '--tty', dest='tty', default='/dev/ttyS0',
+         help='set serial port device [/dev/ttyS0]')
+   parser.add_option('-u', '--update-delay', dest='delay', default=60,
+         help='polling/update delay in seconds [60]')
+   return parser.parse_args()
 
 
 if __name__ == '__main__':
-
-   opts = get_options()
+   prog = os.path.basename(sys.argv[0])
+   parser = optparse.OptionParser(usage=prog+" USER PASSWORD [options]")
+   opts,args = get_options(parser)
    init_log( opts.quiet, opts.debug )
 
-   station = weather.stations.VantagePro(DEVICE, ARCHIVE_PER)
+   if len(args) != 2:
+      log.error('invalid id/password parameters')
+      parser.print_help()
+      sys.exit(-1)
+   pwsid,password = args
+
+   station = weather.stations.VantagePro(opts.tty, ARCHIVE_PER)
    net = weather.services.Publisher()
 
    while True:
       # delay till next update time
-      next_update = UPDATE_PER - (time.time() % UPDATE_PER)
+      next_update = opts.delay - (time.time() % opts.delay)
       log.info('sleep')
       time.sleep( next_update )
 
       try:
-         weather_update( station, net)
+         weather_update( station, net, pwsid, password)
       except (Exception) as e:
          log.error(e)
 
