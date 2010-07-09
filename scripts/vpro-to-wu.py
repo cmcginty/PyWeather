@@ -134,8 +134,7 @@ def get_options(parser):
 
 
 if __name__ == '__main__':
-   prog = os.path.basename(sys.argv[0])
-   parser = optparse.OptionParser(usage=prog+" USER PASSWORD [options]")
+   parser = optparse.OptionParser(usage="%prog USER PASSWORD [options]")
    opts,args = get_options(parser)
    init_log( opts.quiet, opts.debug )
 
