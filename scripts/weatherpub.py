@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 #
-#  PyWeather example script for reading Davis Vantage Pro(2) data and uploading
-#  to the WeatherUnderground.com Personal Weather Station (PWS) site.
+#  PyWeather example script for reading PyWeather stations uploading to one or
+#  more PyWeather publication sites
 #
 #  Author:  Patrick C. McGinty
 #  Email:   pyweather@tuxcoder.com
 #  Date:    Sunday, May 02 2010
-#
-"""
-Periodically read data from a local weather station and upload to the
-Weather Underground PWS site.
-"""
+'''
+Periodically read data from a local weather station and upload to the PyWeather
+publication site.
+'''
 
 import os
 import sys
@@ -28,6 +27,13 @@ ARCHIVE_INTERVAL  = 10  # intervals (in minutes) between each archive record
 GUST_TTL          = 10  # gust 'time to live'; define many minutes should
                         # gust be reported
 GUST_MPH_MIN      = 7   # minimum mph of gust above avg wind speed to report
+
+# Publication Services Lookup Table
+#     key expected to match optparse destination paramter
+#     value defines class object of publication service
+PUB_SERVICES = {
+      'wug' : weather.services.Wunderground
+   }
 
 
 class NoSensorException(Exception): pass
@@ -66,7 +72,7 @@ class WindGust(object):
 WindGust = WindGust()
 
 
-def weather_update(station,net,pwsid,password,interval):
+def weather_update(station, pub_sites, interval):
    '''
    main execution loop. query weather data and post to online service.
    '''
@@ -81,21 +87,21 @@ def weather_update(station,net,pwsid,password,interval):
    gust, gust_dir = WindGust.get( station, interval )
 
    # upload data in the following order:
-   net.set(
-         pressure    = station.fields['Pressure'],
-         dewpoint    = station.fields['DewPoint'],
-         humidity    = station.fields['HumOut'],
-         tempf       = station.fields['TempOut'],
-         rainin      = station.fields['RainRate'],
-         rainday     = station.fields['RainDay'],
-         dateutc     = station.fields['DateStampUtc'],
-         windspeed   = station.fields['WindSpeed10Min'],
-         winddir     = station.fields['WindDir'],
-         windgust    = gust,
-         windgustdir = gust_dir, )
+   for ps in pub_site:
+      ps.set(
+            pressure    = station.fields['Pressure'],
+            dewpoint    = station.fields['DewPoint'],
+            humidity    = station.fields['HumOut'],
+            tempf       = station.fields['TempOut'],
+            rainin      = station.fields['RainRate'],
+            rainday     = station.fields['RainDay'],
+            dateutc     = station.fields['DateStampUtc'],
+            windspeed   = station.fields['WindSpeed10Min'],
+            winddir     = station.fields['WindDir'],
+            windgust    = gust,
+            windgustdir = gust_dir, )
 
-   # send to WeatherUnderground
-   net.publish( pwsid, password )
+      ps.publish()
 
 
 def init_log( quiet, debug ):
@@ -118,10 +124,31 @@ def init_log( quiet, debug ):
          log.setLevel(logging.DEBUG)
 
 
+def get_pub_services(opts):
+   '''
+   use values in opts data to generate instances of publication services.
+   '''
+   sites = []
+   for v in vars(opts).keys():
+      if v in PUB_SERVICES and getattr(opts,v):
+         ps = PUB_SERVICES[v](*getattr(opts,v))
+         sites.append( ps )
+   return sites
+
+
 def get_options(parser):
    '''
    read command line options to configure program behavior.
    '''
+   # station services
+   # publication services
+   pub_g = optparse.OptionGroup( parser, "Publication Services",
+         '''One or more publication service must be specified to enable upload
+         of weather data.''', )
+   pub_g.add_option('-w', '--wundergound', nargs=2, type='string', dest='wug',
+         help='Weather Underground service; WUG=[SID(station ID), PASSWORD]')
+   parser.add_option_group(pub_g)
+
    parser.add_option('-d', '--debug', dest='debug', action="store_true",
          default=False, help='enable verbose debug logging')
    parser.add_option('-q', '--quiet', dest='quiet', action="store_true",
@@ -134,18 +161,18 @@ def get_options(parser):
 
 
 if __name__ == '__main__':
-   parser = optparse.OptionParser(usage="%prog USER PASSWORD [options]")
+   parser = optparse.OptionParser()
    opts,args = get_options(parser)
    init_log( opts.quiet, opts.debug )
 
-   if len(args) != 2:
-      log.error('invalid id/password parameters')
-      parser.print_help()
+   # configure publication service defined in commmand-line args
+   pub_sites = get_pub_services(opts)
+
+   if not pub_sites:
+      log.error('no publication service defined')
       sys.exit(-1)
-   pwsid,password = args
 
    station = weather.stations.VantagePro(opts.tty, ARCHIVE_INTERVAL)
-   net = weather.services.Publisher()
 
    while True:
       # pause untill next update time
@@ -154,7 +181,7 @@ if __name__ == '__main__':
       time.sleep( next_update )
 
       try:
-         weather_update( station, net, pwsid, password, opts.interval)
+         weather_update( station, pub_sites, opts.interval)
       except (Exception) as e:
          log.error(e)
 
