@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 #
 # PyWeather
+# (c) 2010 Patrick C. McGinty <pyweather@tuxcoder.com>
 # (c) 2005 Christopher Blunck <chris@wxnet.org>
 #
 # You're welcome to redistribute this software under the
@@ -11,7 +12,6 @@
 # which should come along with this software, or visit
 # the Free Software Foundation's WEB site http://www.fsf.org
 #
-# $Id: $
 
 import os
 from distutils.core import setup

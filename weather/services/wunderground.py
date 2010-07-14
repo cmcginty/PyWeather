@@ -15,9 +15,9 @@ passed to the constructor is a float that represents the number of
 seconds between observations.
 
 Usage:
->>> publisher = Publisher()
->>> publisher.set(30.12, 28.52, 53.0, 44.6, 0.0, time.gmtime(), 0, 0, 0)
->>> response = publisher.publish('MyUserName', 'MyPassword')
+>>> publisher = Wunderground( 'MySiteID', 'MyPassowrd')
+>>> publisher.set( ... )
+>>> response = publisher.publish()
 >>> print '%s: %s' % (response.status, response.reason)
 
 Notes on arguments to Publisher.set():
@@ -35,6 +35,8 @@ Developers Notes:
 It appears that even if you provide an invalid username and password,
 a status of 200, and a reason of "OK" is returned.
 
+Author: Patrick C. McGinty (pyweather@tuxcoder.com)
+Date: Tuesday, July 13 2010
 Author: Christopher Blunck (chris@wxnet.org)
 Date: 2006-03-27
 '''
@@ -44,11 +46,10 @@ from __future__ import absolute_import
 import logging
 log = logging.getLogger(__name__)
 
+from . _base import *
 
-class PublishException(Exception): pass
 
-
-class Publisher:
+class Wunderground(HttpPublisher):
     '''
     Publishes weather data to the wunderground.com servers.  See
     module documentation for additional information and usage idioms.
@@ -58,15 +59,30 @@ class Publisher:
     REALTIME_SERVER = "rtupdate.wunderground.com"
     URI = "/weatherstation/updateweatherstation.php"
 
-    def __init__(self, rtfreq=None):
-        self.args = {}
-        self.rtfreq = rtfreq
+    def __init__(self, sid, password, rtfreq=None):
+        super(Wunderground,self).__init__(sid,password)
+        self.args = {   'ID':sid,
+                        'PASSWORD':password,
+                        'action':'updateraw',
+                        'softwaretype':'PyWeather', }
+        if rtfreq:
+            self.args['realtime'] = 1
+            self.args['rtfreq'] = self.rtfreq
+            self.server = self.REALTIME_SERVER
+        else:
+            self.server = self.STD_SERVER
 
-    def set(self, pressure='NA', dewpoint='NA', humidity='NA', tempf='NA',
+
+    def set( self, pressure='NA', dewpoint='NA', humidity='NA', tempf='NA',
             rainin='NA', rainday='NA', dateutc='NA', windgust='NA',
             windgustdir='NA', windspeed='NA', winddir='NA',
-            clouds='NA', weather='NA'):
-
+            clouds='NA', weather='NA', *args, **kw):
+        '''
+        Usefull for defining weather data published to the server. Parameters
+        not set will be cleared and not set to server. Unknown keyword args
+        will be silently ignored, so be careful. This is necessory for
+        publishers that support more fields than others.
+        '''
         self.args['baromin'] = pressure
         self.args['dewptf'] = dewpoint
         self.args['humidity'] = humidity
@@ -83,47 +99,9 @@ class Publisher:
         self.args = dict((k,v) for k,v in self.args.items() if v != 'NA')
         log.debug( self.args )
 
-    def _publish(self, user, passwd, args, server, uri, debug):
-        from httplib import HTTPConnection
-        from urllib import urlencode
-
-        uri = uri + "?" + urlencode(args)
-
-        if debug:
-            print 'Connect to: http://%s' % server
-            print 'GET %s' % uri
-            print '\nFull URL: http://%s%s' % (server, uri)
-
-        conn = HTTPConnection(server, timeout=5)
-        if not conn:
-            raise PublishException('Remote server connection timeout')
-        conn.request("GET", uri)
-
-        http = conn.getresponse()
-        data = (http.status, http.reason, http.read())
-        conn.close()
-        if not (data[0] == 200 and
-                data[1] == 'OK' and
-                data[2].find('success') >= 0):
-            raise PublishException('Server returned invalid status: %d %s %s'
-                    % data)
-        return data
 
 
-    def publish(self, username, password, debug=False):
-        self.args['ID'] = username
-        self.args['PASSWORD'] = password
-        self.args['action'] = 'updateraw'
-        self.args['softwaretype'] = "PyWeather"
-
-        server = Publisher.STD_SERVER
-        if self.rtfreq:
-            self.args['realtime'] = 1
-            self.args['rtfreq'] = self.rtfreq
-            server = Publisher.REALTIME_SERVER
-
-        uri = Publisher.URI
-        return self._publish(username, password, self.args, server, uri, debug)
-
+# for legacy support <= v0.8.2, depreciated, do not use
+Publisher = Wunderground
 
 # vim: sts=4:ts=4:sw=4
