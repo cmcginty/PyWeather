@@ -45,7 +45,6 @@ class HttpPublisher(object):
 
       log.debug('Connect to: http://%s' % server)
       log.debug('GET %s' % uri)
-      log.debug('\nFull URL: http://%s%s' % (server, uri))
 
       conn = HTTPConnection(server, timeout=5)
       if not conn:
@@ -55,9 +54,7 @@ class HttpPublisher(object):
       http = conn.getresponse()
       data = (http.status, http.reason, http.read())
       conn.close()
-      if not (data[0] == 200 and
-             data[1] == 'OK' and
-             data[2].find('success') >= 0):
+      if not (data[0] == 200 and data[1] == 'OK'):
          raise PublishException('Server returned invalid status: %d %s %s'
                  % data)
       return data

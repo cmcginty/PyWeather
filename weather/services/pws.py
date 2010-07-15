@@ -85,3 +85,11 @@ class PWS(HttpPublisher):
           } )
       log.debug( self.args )
 
+
+   def publish( self, *a, **kw):
+      http = super( PWS, self).publish( *a, **kw)
+      if not http[2].find('Logged and posted') >= 0:
+         raise PublishException('Server returned invalid status: %d %s %s'
+              % http)
+      return http
+

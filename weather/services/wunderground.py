@@ -109,6 +109,14 @@ class Wunderground(HttpPublisher):
         log.debug( self.args )
 
 
+    def publish( self, *a, **kw):
+        http = super( Wunderground, self).publish( *a, **kw)
+        if not http[2].find('success') >= 0:
+            raise PublishException('Server returned invalid status: %d %s %s'
+                 % http)
+        return http
+
+
 # for legacy support <= v0.8.2, depreciated, do not use
 Publisher = Wunderground
 
