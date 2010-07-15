@@ -522,11 +522,11 @@ class VantagePro(object):
         fields['DewPoint']  = calc_dewpoint(temp, hum)
         # store current data string
         now = time.localtime()
-        fields['DateStamp'] = time.strftime("%y-%m-%d %H:%M:%S", now)
+        fields['DateStamp'] = time.strftime("%Y-%m-%d %H:%M:%S", now)
         fields['Year'] = now[0]
         fields['Month'] = str(now[1]).zfill(2)
         now = time.gmtime()
-        fields['DateStampUtc'] = time.strftime("%y-%m-%d %H:%M:%S", now)
+        fields['DateStampUtc'] = time.strftime("%Y-%m-%d %H:%M:%S", now)
         fields['YearUtc'] = now[0]
         fields['MonthUtc'] = str(now[1]).zfill(2)
 
