@@ -88,21 +88,24 @@ def weather_update(station, pub_sites, interval):
    gust, gust_dir = WindGust.get( station, interval )
 
    # upload data in the following order:
-   for ps in pub_site:
-      ps.set(
-            pressure    = station.fields['Pressure'],
-            dewpoint    = station.fields['DewPoint'],
-            humidity    = station.fields['HumOut'],
-            tempf       = station.fields['TempOut'],
-            rainin      = station.fields['RainRate'],
-            rainday     = station.fields['RainDay'],
-            dateutc     = station.fields['DateStampUtc'],
-            windspeed   = station.fields['WindSpeed10Min'],
-            winddir     = station.fields['WindDir'],
-            windgust    = gust,
-            windgustdir = gust_dir, )
+   for ps in pub_sites:
+      try: # try block necessary to attempt every pulisher
+         ps.set(
+               pressure    = station.fields['Pressure'],
+               dewpoint    = station.fields['DewPoint'],
+               humidity    = station.fields['HumOut'],
+               tempf       = station.fields['TempOut'],
+               rainin      = station.fields['RainRate'],
+               rainday     = station.fields['RainDay'],
+               dateutc     = station.fields['DateStampUtc'],
+               windspeed   = station.fields['WindSpeed10Min'],
+               winddir     = station.fields['WindDir'],
+               windgust    = gust,
+               windgustdir = gust_dir, )
 
-      ps.publish()
+         ps.publish()
+      except (Exception) as e:
+         log.error(e)
 
 
 def init_log( quiet, debug ):
@@ -110,8 +113,8 @@ def init_log( quiet, debug ):
    setup system logging to desired verbosity.
    '''
    from logging.handlers import SysLogHandler
-   fmt = logging.Formatter(
-         "vpro-to-wu.%(name)s %(levelname)s - %(message)s")
+   fmt = logging.Formatter( os.path.basename(sys.argv[0]) +
+         ".%(name)s %(levelname)s - %(message)s")
    facility = SysLogHandler.LOG_DAEMON
    syslog = SysLogHandler(address='/dev/log',facility=facility)
    syslog.setFormatter( fmt )
