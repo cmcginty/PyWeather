@@ -15,10 +15,10 @@ class HttpPublisher(object):
    '''
    Abstract base class for creation generic HTTP publication services
    '''
-
-   STD_SERVER       = None
-   REALTIME_SERVER  = None
-   URI              = None
+   SOFTWARE          = 'PyWeather'
+   STD_SERVER        = None
+   REALTIME_SERVER   = None
+   URI               = None
 
    def __init__(self, sid, password, rtfreq=None):
       self.sid = sid
@@ -40,6 +40,7 @@ class HttpPublisher(object):
       from httplib import HTTPConnection
       from urllib import urlencode
 
+      args = dict((k,v) for k,v in args.items() if v != 'NA')
       uri = uri + "?" + urlencode(args)
 
       log.debug('Connect to: http://%s' % server)

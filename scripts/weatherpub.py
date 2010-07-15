@@ -32,7 +32,8 @@ GUST_MPH_MIN      = 7   # minimum mph of gust above avg wind speed to report
 #     key expected to match optparse destination paramter
 #     value defines class object of publication service
 PUB_SERVICES = {
-      'wug' : weather.services.Wunderground
+      'wug' : weather.services.Wunderground,
+      'pws' : weather.services.PWS,
    }
 
 
@@ -147,6 +148,8 @@ def get_options(parser):
          of weather data.''', )
    pub_g.add_option('-w', '--wundergound', nargs=2, type='string', dest='wug',
          help='Weather Underground service; WUG=[SID(station ID), PASSWORD]')
+   pub_g.add_option('-p', '--pws', nargs=2, type='string', dest='pws',
+         help='PWS service; PWS=[SID(station ID), PASSWORD]')
    parser.add_option_group(pub_g)
 
    parser.add_option('-d', '--debug', dest='debug', action="store_true",
