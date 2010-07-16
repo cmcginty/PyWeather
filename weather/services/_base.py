@@ -28,7 +28,7 @@ class HttpPublisher(object):
 
    def set( self, *args, **kw):
       '''
-      Usefull for defining weather data published to the server. Each
+      Useful for defining weather data published to the server. Each
       publication service implements their own supported keyword args, but
       should support any number of arguments.
       '''
@@ -62,7 +62,7 @@ class HttpPublisher(object):
 
    def publish(self):
       '''
-      Peform HTTP session to transmit defined weather values.
+      Perform HTTP session to transmit defined weather values.
       '''
       return self._publish( self.args, self.server, self.URI)
 

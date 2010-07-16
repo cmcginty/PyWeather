@@ -29,7 +29,7 @@ GUST_TTL          = 10  # gust 'time to live'; define many minutes should
 GUST_MPH_MIN      = 7   # minimum mph of gust above avg wind speed to report
 
 # Publication Services Lookup Table
-#     key expected to match optparse destination paramter
+#     key expected to match optparse destination parameter
 #     value defines class object of publication service
 PUB_SERVICES = {
       'wug'    : weather.services.Wunderground,
@@ -90,7 +90,7 @@ def weather_update(station, pub_sites, interval):
 
    # upload data in the following order:
    for ps in pub_sites:
-      try: # try block necessary to attempt every pulisher
+      try: # try block necessary to attempt every publisher
          ps.set(
                pressure    = station.fields['Pressure'],
                dewpoint    = station.fields['DewPoint'],
@@ -178,7 +178,7 @@ if __name__ == '__main__':
    opts,args = get_options(parser)
    init_log( opts.quiet, opts.debug )
 
-   # configure publication service defined in commmand-line args
+   # configure publication service defined in command-line args
    pub_sites = get_pub_services(opts)
 
    if not pub_sites:
@@ -188,7 +188,7 @@ if __name__ == '__main__':
    station = weather.stations.VantagePro(opts.tty, ARCHIVE_INTERVAL)
 
    while True:
-      # pause untill next update time
+      # pause until next update time
       next_update = opts.interval - (time.time() % opts.interval)
       log.info('sleep')
       time.sleep( next_update )

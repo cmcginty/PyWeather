@@ -21,7 +21,7 @@ Notes on arguments to Publisher.set():
 <float> rainday:    total rainfall for day (localtime)
 <float> rainmonth:  total rainfall for month (localtime)
 <float> rainyear:   total rainfall for year (localtime)
-<tuple> dateutc:    9 value time tuple in UTC (e.g. time.gmtime())
+<tuple> dateutc:    date string, "YYYY-MM-DD HH:MM:SS"
 <float> windgust:   in mph
 <float> windspeed:  in mph
 <float> winddir:    in degrees, between 0.0 and 360.0
@@ -61,9 +61,9 @@ class PwsWeather(HttpPublisher):
          dateutc='NA', windgust='NA', windspeed='NA', winddir='NA',
          weather='NA', *args, **kw):
       '''
-      Usefull for defining weather data published to the server. Parameters not
+      Useful for defining weather data published to the server. Parameters not
       sent will be cleared and not set to server. Unknown keyword args will be
-      silently ignored, so be careful. This is necessory for publishers that
+      silently ignored, so be careful. This is necessary for publishers that
       support more fields than others.
       '''
       # unused, but valid, parameters are:

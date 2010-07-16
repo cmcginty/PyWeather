@@ -27,7 +27,7 @@ Notes on arguments to Publisher.set():
 <float> tempf:      in Fahrenheit
 <float> rainin:     inches/hour of rain
 <float> rainday:    total rainfall in day (localtime)
-<tuple> dateutc:    9 value time tuple in UTC (e.g. time.gmtime())
+<string> dateutc:   date "YYYY-MM-DD HH:MM:SS" in GMT timezone
 <float> windgust:   in mph
 <float> windgustdir:in degrees, between 0.0 and 360.0
 <float> windspeed:  in mph
@@ -81,9 +81,9 @@ class Wunderground(HttpPublisher):
             windgustdir='NA', windspeed='NA', winddir='NA',
             clouds='NA', weather='NA', *args, **kw):
         '''
-        Usefull for defining weather data published to the server. Parameters
+        Useful for defining weather data published to the server. Parameters
         not set will be reset and not sent to server. Unknown keyword args will
-        be silently ignored, so be careful. This is necessory for publishers
+        be silently ignored, so be careful. This is necessary for publishers
         that support more fields than others.
         '''
         # see: http://wiki.wunderground.com/index.php/PWS_-_Upload_Protocol
