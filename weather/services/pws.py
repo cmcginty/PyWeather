@@ -7,7 +7,7 @@ The class contained within this module allows python programs to
 publish weather conditions to the pwsweather.com servers.
 
 Usage:
->>> publisher = PWS( 'MySiteID', 'MyPassowrd')
+>>> publisher = PwsWeather( 'MySiteID', 'MyPassowrd')
 >>> publisher.set( ... )
 >>> response = publisher.publish()
 >>> print '%s: %s' % (response.status, response.reason)
@@ -39,7 +39,7 @@ log = logging.getLogger(__name__)
 from . _base import *
 
 
-class PWS(HttpPublisher):
+class PwsWeather(HttpPublisher):
    '''
    Publishes weather data to the pwsweather.com servers. See module
    documentation for additional information and usage idioms.
@@ -48,7 +48,7 @@ class PWS(HttpPublisher):
    URI = "/pwsupdate/pwsupdate.php"
 
    def __init__(self, sid, password):
-      super(PWS,self).__init__(sid,password)
+      super(PwsWeather,self).__init__(sid,password)
       self.args = {  'ID':sid,
                      'PASSWORD':password,
                      'action':'updateraw',
@@ -86,8 +86,8 @@ class PWS(HttpPublisher):
       log.debug( self.args )
 
 
-   def publish( self, *a, **kw):
-      http = super( PWS, self).publish( *a, **kw)
+   def publish(self):
+      http = super(PwsWeather,self).publish()
       if not http[2].find('Logged and posted') >= 0:
          raise PublishException('Server returned invalid status: %d %s %s'
               % http)

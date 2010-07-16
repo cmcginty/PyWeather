@@ -32,8 +32,9 @@ GUST_MPH_MIN      = 7   # minimum mph of gust above avg wind speed to report
 #     key expected to match optparse destination paramter
 #     value defines class object of publication service
 PUB_SERVICES = {
-      'wug' : weather.services.Wunderground,
-      'pws' : weather.services.PWS,
+      'wug'    : weather.services.Wunderground,
+      'pws'    : weather.services.PwsWeather,
+      'file'   : weather.services.TextFile,
    }
 
 
@@ -133,9 +134,13 @@ def get_pub_services(opts):
    use values in opts data to generate instances of publication services.
    '''
    sites = []
-   for v in vars(opts).keys():
-      if v in PUB_SERVICES and getattr(opts,v):
-         ps = PUB_SERVICES[v](*getattr(opts,v))
+   for p_key in vars(opts).keys():
+      args = getattr(opts,p_key)
+      if p_key in PUB_SERVICES and args:
+         if isinstance(args,tuple):
+            ps = PUB_SERVICES[p_key](*args)
+         else:
+            ps = PUB_SERVICES[p_key](args)
          sites.append( ps )
    return sites
 
@@ -153,6 +158,8 @@ def get_options(parser):
          help='Weather Underground service; WUG=[SID(station ID), PASSWORD]')
    pub_g.add_option('-p', '--pws', nargs=2, type='string', dest='pws',
          help='PWS service; PWS=[SID(station ID), PASSWORD]')
+   pub_g.add_option('-f', '--file', nargs=1, type='string', dest='file',
+         help='Local file; FILE=[FILE_NAME]')
    parser.add_option_group(pub_g)
 
    parser.add_option('-d', '--debug', dest='debug', action="store_true",
