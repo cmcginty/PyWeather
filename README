@@ -15,7 +15,7 @@ Unit Conversion
 
 PyWeather has a lot of support for common unit conversions in
 distance, temperature, pressure, and volume.  Conversion from
-fahrenheit to celsius, and kelvin is supported, as well as conversions
+Fahrenheit to Celsius, and kelvin is supported, as well as conversions
 between inches of mercury and millibars.
 
 
@@ -34,8 +34,12 @@ Data Publication
 ----------------
 
 PyWeather contains a module that allows developers to post conditions
-to the wunderground.com site.  Future work in this area includes
-publication to APRSWXNET and WeatherNet.
+to weather aggregation sites. The current list of support services includes:
+
+- WeatherUnderground (wundgerground.com)
+- PWS Weather        (pwsweather.com)
+- WeatherForYou      (weatherforyou.com)
 
 
-For additional information, please email the maintainer:  pyweather@tuxcoder.com
+For additional information, please email the maintainer:
+   pyweather@tuxcoder.com

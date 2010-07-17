@@ -1,6 +1,14 @@
 .. PyWeather // (c) 2010, Patrick C. McGinty
    pyweather[@]tuxcoder[dot]com
 
+v0.9
+======
+:Release Date: 7/16/10
+
+* Renamed vpro-to-wu.py script to weatherpub.py
+* Add support for pwsweather.com publication
+* Add support for local file publication
+
 v0.8.2
 ======
 :Release Date: 7/1/10

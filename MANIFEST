@@ -4,9 +4,12 @@ INSTALL.txt
 Makefile
 README
 setup.py
-scripts/vpro-to-wu.py
+scripts/weatherpub.py
 weather/__init__.py
 weather/services/__init__.py
+weather/services/_base.py
+weather/services/file.py
+weather/services/pws.py
 weather/services/wunderground.py
 weather/stations/__init__.py
 weather/stations/_struct.py
