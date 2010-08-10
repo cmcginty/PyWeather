@@ -1,6 +1,11 @@
 .. PyWeather // (c) 2010, Patrick C. McGinty
    pyweather[@]tuxcoder[dot]com
 
+v0.9.1
+======
+:Release Date: 8/9/10
+* Enhance debug output for publication failures
+
 v0.9
 ======
 :Release Date: 7/16/10

@@ -5,7 +5,7 @@
 
 
 NAME=weather
-VER=0.9
+VER=$(shell python -c 'import weather;print weather.__version__')
 DIST_DIR=dist
 TAR=${DIST_DIR}/${NAME}-${VER}.tar.gz
 SRC_DIR=${DIST_DIR}/${NAME}-${VER}
