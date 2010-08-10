@@ -106,7 +106,7 @@ def weather_update(station, pub_sites, interval):
 
          ps.publish()
       except (Exception) as e:
-         log.error(e)
+         log.warn('publisher %s: %s'%(ps.__class__.__name__,e))
 
 
 def init_log( quiet, debug ):
