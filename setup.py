@@ -30,7 +30,9 @@ setup(name = name,
       author = "Patrick C. McGinty, Christopher Blunck",
       author_email = "pyweather@tuxcoder.com, chris@wxnet.org",
       url = "http://github.com/cmcginty/PyWeather",
-      download_url = "",
+      download_url =
+         "http://github.com/cmcginty/PyWeather/raw/master/dist/%s-%s.tar.gz" %
+         (name,pkg.__version__),
       packages= [
          name,
          name+'.services',
