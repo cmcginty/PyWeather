@@ -30,18 +30,19 @@ import serial
 import struct
 import time
 from array import array
+import datetime as dt
 
 log = logging.getLogger(__name__)
 
 # public interfaces for module
-__all__ = ['VantagePro', 'NoDeviceException' ]
+__all__ = ['VantagePro', 'NoDeviceException']
 
 READ_DELAY = 5
 BAUD = 19200
 
 
-def log_raw(msg,raw):
-    log.debug( msg + ': ' + raw.encode('hex') )
+def log_raw(msg, raw):
+    log.debug(msg + ': ' + raw.encode('hex'))
 
 
 class NoDeviceException(Exception): pass
@@ -86,8 +87,7 @@ class VProCRC(object):
         0x7c26, 0x6c07, 0x5c64, 0x4c45, 0x3ca2, 0x2c83, 0x1ce0, 0xcc1,
         0xef1f, 0xff3e, 0xcf5d, 0xdf7c, 0xaf9b, 0xbfba, 0x8fd9, 0x9ff8,
         0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0xed1, 0x1ef0,
-      )
-
+    )
 
     @staticmethod
     def get(data):
@@ -95,10 +95,9 @@ class VProCRC(object):
         return CRC calc value from raw serial data
         '''
         crc = 0
-        for byte in array('B',data):
-            crc = (VProCRC.CRC_TABLE[ (crc>>8) ^ byte ] ^ ((crc&0xFF) << 8))
+        for byte in array('B', data):
+            crc = (VProCRC.CRC_TABLE[(crc >> 8) ^ byte] ^ ((crc & 0xFF) << 8))
         return crc
-
 
     @staticmethod
     def verify(data):
@@ -109,196 +108,196 @@ class VProCRC(object):
         if len(data) == 0:
             return False
         crc = VProCRC.get(data)
-        if crc: log.info("CRC Bad")
-        else:   log.debug("CRC OK")
+        if crc:
+            log.info("CRC Bad")
+        else:
+            log.debug("CRC OK")
         return not crc
+
 
 # --------------------------------------------------------------------------- #
 
-class LoopStruct( Struct ):
+class LoopStruct(Struct):
     '''
     For unpacking data structure returned by the 'LOOP' command. this structure
     contains all of the real-time data that can be read from the Davis Vantage
     Pro.
     '''
     FMT = (
-        ('LOO',         '3s'), ('BarTrend',    'B'),  ('PacketType',  'B'),
-        ('NextRec',      'H'), ('Pressure',    'H'),  ('TempIn',      'H'),
-        ('HumIn',        'B'), ('TempOut',     'H'),  ('WindSpeed',   'B'),
-        ('WindSpeed10Min','B'),('WindDir',     'H'),  ('ExtraTemps',  '7s'),
-        ('SoilTemps',   '4s'), ('LeafTemps',  '4s'),  ('HumOut',      'B'),
-        ('HumExtra',    '7s'), ('RainRate',    'H'),  ('UV',          'B'),
-        ('SolarRad',     'H'), ('RainStorm',   'H'),  ('StormStartDate','H'),
-        ('RainDay',      'H'), ('RainMonth',   'H'),  ('RainYear',    'H'),
-        ('ETDay',        'H'), ('ETMonth',     'H'),  ('ETYear',      'H'),
-        ('SoilMoist',   '4s'), ('LeafWetness','4s'),  ('AlarmIn',     'B'),
-        ('AlarmRain',    'B'), ('AlarmOut' ,  '2s'),  ('AlarmExTempHum','8s'),
-        ('AlarmSoilLeaf','4s'),('BatteryStatus','B'), ('BatteryVolts','H'),
-        ('ForecastIcon','B'),  ('ForecastRuleNo','B'),('SunRise',     'H'),
-        ('SunSet',      'H'),  ('EOL',         '2s'), ('CRC',         'H'),
-      )
-
+        ('LOO', '3s'), ('BarTrend', 'B'), ('PacketType', 'B'),
+        ('NextRec', 'H'), ('Pressure', 'H'), ('TempIn', 'H'),
+        ('HumIn', 'B'), ('TempOut', 'H'), ('WindSpeed', 'B'),
+        ('WindSpeed10Min', 'B'), ('WindDir', 'H'), ('ExtraTemps', '7s'),
+        ('SoilTemps', '4s'), ('LeafTemps', '4s'), ('HumOut', 'B'),
+        ('HumExtra', '7s'), ('RainRate', 'H'), ('UV', 'B'),
+        ('SolarRad', 'H'), ('RainStorm', 'H'), ('StormStartDate', 'H'),
+        ('RainDay', 'H'), ('RainMonth', 'H'), ('RainYear', 'H'),
+        ('ETDay', 'H'), ('ETMonth', 'H'), ('ETYear', 'H'),
+        ('SoilMoist', '4s'), ('LeafWetness', '4s'), ('AlarmIn', 'B'),
+        ('AlarmRain', 'B'), ('AlarmOut', '2s'), ('AlarmExTempHum', '8s'),
+        ('AlarmSoilLeaf', '4s'), ('BatteryStatus', 'B'), ('BatteryVolts', 'H'),
+        ('ForecastIcon', 'B'), ('ForecastRuleNo', 'B'), ('SunRise', 'H'),
+        ('SunSet', 'H'), ('EOL', '2s'), ('CRC', 'H'),
+    )
 
     def __init__(self):
-        super(LoopStruct,self).__init__(self.FMT,'=')
+        super(LoopStruct, self).__init__(self.FMT, '=')
 
-
-    def _post_unpack(self,items):
-        items['Pressure']       = items['Pressure']   / 1000.0
-        items['TempIn']         = items['TempIn']     /   10.0
-        items['TempOut']        = items['TempOut']    /   10.0
-        items['RainRate']       = items['RainRate']   /  100.0
-        items['RainStorm']      = items['RainStorm']  /  100.0
+    def _post_unpack(self, items):
+        items['Pressure'] = items['Pressure'] / 1000.0
+        items['TempIn'] = items['TempIn'] / 10.0
+        items['TempOut'] = items['TempOut'] / 10.0
+        items['RainRate'] = items['RainRate'] / 100.0
+        items['RainStorm'] = items['RainStorm'] / 100.0
         items['StormStartDate'] = self._unpack_storm_date(
-                                        items['StormStartDate'])
+            items['StormStartDate'])
         # rain totals
-        items['RainDay']     = items['RainDay']   /  100.0
-        items['RainMonth']   = items['RainMonth'] /  100.0
-        items['RainYear']    = items['RainYear']  /  100.0
+        items['RainDay'] = items['RainDay'] / 100.0
+        items['RainMonth'] = items['RainMonth'] / 100.0
+        items['RainYear'] = items['RainYear'] / 100.0
         # evapotranspiration totals
-        items['ETDay']       = items['ETDay']     / 1000.0
-        items['ETMonth']     = items['ETMonth']   /  100.0
-        items['ETYear']      = items['ETYear']    /  100.0
+        items['ETDay'] = items['ETDay'] / 1000.0
+        items['ETMonth'] = items['ETMonth'] / 100.0
+        items['ETYear'] = items['ETYear'] / 100.0
         # soil moisture + leaf wetness
-        items['SoilMoist']   = struct.unpack('4B',items['SoilMoist'])
-        items['LeafWetness'] = struct.unpack('4B',items['LeafWetness'])
+        items['SoilMoist'] = struct.unpack('4B', items['SoilMoist'])
+        items['LeafWetness'] = struct.unpack('4B', items['LeafWetness'])
         # battery statistics
         items['BatteryVolts'] = items['BatteryVolts'] * 300 / 512.0 / 100.0
         # sunrise / sunset
-        items['SunRise'] = self._unpack_time( items['SunRise'] )
-        items['SunSet']  = self._unpack_time( items['SunSet'] )
+        items['SunRise'] = self._unpack_time(items['SunRise'])
+        items['SunSet'] = self._unpack_time(items['SunSet'])
         return items
 
-
     @staticmethod
-    def _unpack_time( val ):
+    def _unpack_time(val):
         '''
         given a packed time field, unpack and return "HH:MM" string.
         '''
         # format: HHMM, and space padded on the left.ex: "601" is 6:01 AM
-        return "%02d:%02d" % divmod(val,100)  # covert to "06:01"
-
+        return "%02d:%02d" % divmod(val, 100)  # covert to "06:01"
 
     @staticmethod
-    def _unpack_storm_date( date ):
+    def _unpack_storm_date(date):
         '''
         given a packed storm date field, unpack and return 'YYYY-MM-DD' string.
         '''
-        year  = (date & 0x7f) + 2000        # 7 bits
-        day   = (date >> 7) & 0x01f         # 5 bits
-        month = (date >> 12) & 0x0f         # 4 bits
+        year = (date & 0x7f) + 2000  # 7 bits
+        day = (date >> 7) & 0x01f  # 5 bits
+        month = (date >> 12) & 0x0f  # 4 bits
         return "%s-%s-%s" % (year, month, day)
+
 
 # --------------------------------------------------------------------------- #
 
-class _ArchiveStruct( object ):
+class _ArchiveStruct(object):
     '''
     common features for both Rev.A and Rev.B structures.
     '''
+
     def __init__(self):
-        super(_ArchiveStruct,self).__init__(self.FMT,'=')
+        super(_ArchiveStruct, self).__init__(self.FMT, '=')
 
-
-    def _post_unpack( self, items ):
-        vals = self._unpack_date_time( items['DateStamp'], items['TimeStamp'])
-        items.update( zip(('Year','Month','Day','Hour','Min'), vals) )
-        items['TempOut']    = items['TempOut']    /   10.0
-        items['TempOutHi']  = items['TempOutHi']  /   10.0
-        items['TempOutLow'] = items['TempOutLow'] /   10.0
-        items['Pressure']   = items['Pressure']   / 1000.0
-        items['TempIn']     = items['TempIn']     /   10.0
-        items['UV']         = items['UV']         /   10.0
-        items['ETHour']     = items['ETHour']     / 1000.0
-        items['WindHiDir']  = int(items['WindHiDir']    * 22.5)
-        items['WindHiDir']  = int(items['WindAvgDir']   * 22.5)
-        items['SoilTemps']  = tuple(
-                t-90 for t in struct.unpack('4B',items['SoilTemps']))
-        items['ExtraHum']   = struct.unpack('2B',items['ExtraHum'])
-        items['SoilMoist']  = struct.unpack('4B',items['SoilMoist'])
+    def _post_unpack(self, items):
+        vals = self._unpack_date_time(items['DateStamp'], items['TimeStamp'])
+        items.update(zip(('Year', 'Month', 'Day', 'Hour', 'Min'), vals))
+        items['TempOut'] = items['TempOut'] / 10.0
+        items['TempOutHi'] = items['TempOutHi'] / 10.0
+        items['TempOutLow'] = items['TempOutLow'] / 10.0
+        items['Pressure'] = items['Pressure'] / 1000.0
+        items['TempIn'] = items['TempIn'] / 10.0
+        items['UV'] = items['UV'] / 10.0
+        items['ETHour'] = items['ETHour'] / 1000.0
+        items['WindHiDir'] = int(items['WindHiDir'] * 22.5)
+        items['WindHiDir'] = int(items['WindAvgDir'] * 22.5)
+        items['SoilTemps'] = tuple(
+            t - 90 for t in struct.unpack('4B', items['SoilTemps']))
+        items['ExtraHum'] = struct.unpack('2B', items['ExtraHum'])
+        items['SoilMoist'] = struct.unpack('4B', items['SoilMoist'])
         return items
-
 
     @staticmethod
-    def _unpack_date_time( date, time ):
-        day   = date & 0x1f                     # 5 bits
-        month = (date >> 5) & 0x0f              # 4 bits
-        year  = ((date >> 9) & 0x7f) + 2000     # 7 bits
-        hour, min_  = divmod(time,100)
+    def _unpack_date_time(date, time):
+        day = date & 0x1f  # 5 bits
+        month = (date >> 5) & 0x0f  # 4 bits
+        year = ((date >> 9) & 0x7f) + 2000  # 7 bits
+        hour, min_ = divmod(time, 100)
         return (year, month, day, hour, min_)
 
-# --------------------------------------------------------------------------- #
-
-class _ArchiveAStruct( _ArchiveStruct, Struct ):
-    FMT = (
-        ('DateStamp',   'H'),  ('TimeStamp',   'H'),  ('TempOut',     'H'),
-        ('TempOutHi',   'H'),  ('TempOutLow',  'H'),  ('RainRate',    'H'),
-        ('RainRateHi',  'H'),  ('Pressure',    'H'),  ('SolarRad',    'H'),
-        ('WindSamps',   'H'),  ('TempIn',      'H'),  ('HumIn',       'B'),
-        ('HumOut',      'B'),  ('WindAvg',     'B'),  ('WindHi',      'B'),
-        ('WindHiDir',   'B'),  ('WindAvgDir',  'B'),  ('UV',          'B'),
-        ('ETHour',      'B'),  ('unused',      'B'),  ('SoilMoist',  '4s'),
-        ('SoilTemps',  '4s'),  ('LeafWetness','4s'),  ('ExtraTemps', '2s'),
-        ('ExtraHum',   '2s'),  ('ReedClosed',  'H'),  ('ReedOpened',  'H'),
-        ('unused',      'B'),
-      )
-
-
-    def _post_unpack( self, items ):
-        items = super(_ArchiveAStruct,self)._post_unpack( items )
-        items['LeafWetness'] = struct.unpack('4B',items['LeafWetness'])
-        items['ExtraTemps'] = tuple(
-                t-90 for t in struct.unpack('2B',items['ExtraTemps']))
-        return items
 
 # --------------------------------------------------------------------------- #
 
-class _ArchiveBStruct( _ArchiveStruct, Struct ):
+class _ArchiveAStruct(_ArchiveStruct, Struct):
     FMT = (
-        ('DateStamp',   'H'),  ('TimeStamp',   'H'),  ('TempOut',     'H'),
-        ('TempOutHi',   'H'),  ('TempOutLow',  'H'),  ('RainRate',    'H'),
-        ('RainRateHi',  'H'),  ('Pressure',    'H'),  ('SolarRad',    'H'),
-        ('WindSamps',   'H'),  ('TempIn',      'H'),  ('HumIn',       'B'),
-        ('HumOut',      'B'),  ('WindAvg',     'B'),  ('WindHi',      'B'),
-        ('WindHiDir',   'B'),  ('WindAvgDir',  'B'),  ('UV',          'B'),
-        ('ETHour',      'B'),  ('SolarRadHi',  'H'),  ('UVHi',        'B'),
-        ('ForecastRuleNo','B'),('LeafTemps',  '2s'),  ('LeafWetness','2s'),
-        ('SoilTemps',  '4s'),  ('RecType',     'B'),  ('ExtraHum',   '2s'),
-        ('ExtraTemps', '3s'),  ('SoilMoist',  '4s'),
-      )
+        ('DateStamp', 'H'), ('TimeStamp', 'H'), ('TempOut', 'H'),
+        ('TempOutHi', 'H'), ('TempOutLow', 'H'), ('RainRate', 'H'),
+        ('RainRateHi', 'H'), ('Pressure', 'H'), ('SolarRad', 'H'),
+        ('WindSamps', 'H'), ('TempIn', 'H'), ('HumIn', 'B'),
+        ('HumOut', 'B'), ('WindAvg', 'B'), ('WindHi', 'B'),
+        ('WindHiDir', 'B'), ('WindAvgDir', 'B'), ('UV', 'B'),
+        ('ETHour', 'B'), ('unused', 'B'), ('SoilMoist', '4s'),
+        ('SoilTemps', '4s'), ('LeafWetness', '4s'), ('ExtraTemps', '2s'),
+        ('ExtraHum', '2s'), ('ReedClosed', 'H'), ('ReedOpened', 'H'),
+        ('unused', 'B'),
+    )
 
-
-    def _post_unpack( self, items ):
-        items = super(_ArchiveBStruct,self)._post_unpack( items )
-        items['LeafTemps']   = tuple(
-                t-90 for t in struct.unpack('2B',items['LeafTemps']))
-        items['LeafWetness'] = struct.unpack('2B',items['LeafWetness'])
+    def _post_unpack(self, items):
+        items = super(_ArchiveAStruct, self)._post_unpack(items)
+        items['LeafWetness'] = struct.unpack('4B', items['LeafWetness'])
         items['ExtraTemps'] = tuple(
-                t-90 for t in struct.unpack('3B',items['ExtraTemps']))
+            t - 90 for t in struct.unpack('2B', items['ExtraTemps']))
         return items
+
+
+# --------------------------------------------------------------------------- #
+
+class _ArchiveBStruct(_ArchiveStruct, Struct):
+    FMT = (
+        ('DateStamp', 'H'), ('TimeStamp', 'H'), ('TempOut', 'H'),
+        ('TempOutHi', 'H'), ('TempOutLow', 'H'), ('RainRate', 'H'),
+        ('RainRateHi', 'H'), ('Pressure', 'H'), ('SolarRad', 'H'),
+        ('WindSamps', 'H'), ('TempIn', 'H'), ('HumIn', 'B'),
+        ('HumOut', 'B'), ('WindAvg', 'B'), ('WindHi', 'B'),
+        ('WindHiDir', 'B'), ('WindAvgDir', 'B'), ('UV', 'B'),
+        ('ETHour', 'B'), ('SolarRadHi', 'H'), ('UVHi', 'B'),
+        ('ForecastRuleNo', 'B'), ('LeafTemps', '2s'), ('LeafWetness', '2s'),
+        ('SoilTemps', '4s'), ('RecType', 'B'), ('ExtraHum', '2s'),
+        ('ExtraTemps', '3s'), ('SoilMoist', '4s'),
+    )
+
+    def _post_unpack(self, items):
+        items = super(_ArchiveBStruct, self)._post_unpack(items)
+        items['LeafTemps'] = tuple(
+            t - 90 for t in struct.unpack('2B', items['LeafTemps']))
+        items['LeafWetness'] = struct.unpack('2B', items['LeafWetness'])
+        items['ExtraTemps'] = tuple(
+            t - 90 for t in struct.unpack('3B', items['ExtraTemps']))
+        return items
+
 
 # --------------------------------------------------------------------------- #
 
 # simple data structures
 DmpStruct = Struct(
-        (('Pages','H'),('Offset','H'),('CRC','H')),
-        order='=')
+    (('Pages', 'H'), ('Offset', 'H'), ('CRC', 'H')),
+    order='=')
 
 DmpPageStruct = Struct(
-        (('Index','B'),('Records','260s'),('unused','4B'),('CRC','H')),
-        order='=')
+    (('Index', 'B'), ('Records', '260s'), ('unused', '4B'), ('CRC', 'H')),
+    order='=')
 
 # init structure classes
-LoopStruct      = LoopStruct()
-ArchiveAStruct  = _ArchiveAStruct()
-ArchiveBStruct  = _ArchiveBStruct()
+LoopStruct = LoopStruct()
+ArchiveAStruct = _ArchiveAStruct()
+ArchiveBStruct = _ArchiveBStruct()
 
 
 ##############################################################################
-#|--------------------------------------------------------------------------|#
-#|--------------------------------------------------------------------------|#
-#|                     API for the Davis Vantage Pro                        |#
-#|--------------------------------------------------------------------------|#
-#|--------------------------------------------------------------------------|#
+# |--------------------------------------------------------------------------|#
+# |--------------------------------------------------------------------------|#
+# |                     API for the Davis Vantage Pro                        |#
+# |--------------------------------------------------------------------------|#
+# |--------------------------------------------------------------------------|#
 ##############################################################################
 
 class VantagePro(object):
@@ -314,20 +313,47 @@ class VantagePro(object):
 
     # device reply commands
     WAKE_ACK = '\n\r'
-    ACK      = '\x06'
-    ESC      = '\x1b'
-    OK       = '\n\rOK\n\r'
+    ACK = '\x06'
+    ESC = '\x1b'
+    OK = '\n\rOK\n\r'
 
     # archive format type, unknown
     _ARCHIVE_REV_B = None
 
-    def __init__(self, device, log_interval=5):
+    def __init__(self, device, log_interval=5, logStartDate=None, clear=False):
+        '''
+        Initialize the serial connection with the console.
+        :param device: /dev/yourConsoleDevice
+        :param log_interval: default 5
+        :param logStartDate: the datetime.datetime object representing the starting log date. Default None aka "all"
+        :param clear: boolean, if true clean all the log in the console. Default False
+        '''
         self.port = serial.Serial(device, BAUD, timeout=READ_DELAY)
-        self._archive_time  = (0,0)
-        # clear archive, and set loggin interval
-        self._cmd('CLRLOG')     # prevent getting a full log dump at startup
+        # set the logging interval to be downloaded. Default all
+        if logStartDate is None:
+            self._archive_time = (0, 0)
+        else:
+            self._archive_time = (self.calcDateStamp(logStartDate), self.calcTimeStamp(logStartDate))
+        # Clear the whole archive if necessary. Default: no
+        if clear:
+            self._cmd('CLRLOG')  # prevent getting a full log dump at startup
         self._cmd('SETPER', log_interval, ok=True)
 
+    def calcDateStamp(self, date):
+        '''
+        As stated into the Vantage Serial Protocol manual, this method converts a datetime object into the right DateStamp
+        :param date: the datetime object to convert
+        :return: the dateStamp integer
+        '''
+        return date.day + date.month * 32 + (date.year - 2000) * 512
+
+    def calcTimeStamp(self, date):
+        '''
+        As stated into the Vantage Serial Protocol manual, this method converts a datetime object into the right TimeStamp
+        :param date: the datetime object to convert
+        :return: the timeStamp integer
+        '''
+        return 100 * date.hour + date.minute
 
     def __del__(self):
         '''
@@ -335,8 +361,7 @@ class VantagePro(object):
         '''
         self.port.close()
 
-
-    def _use_rev_b_archive(self,records,offset):
+    def _use_rev_b_archive(self, records, offset):
         '''
         return True if weather station returns Rev.B archives
         '''
@@ -344,7 +369,7 @@ class VantagePro(object):
         if type(self._ARCHIVE_REV_B) is bool:
             return self._ARCHIVE_REV_B
         # assume, B and check 'RecType' field
-        data = ArchiveBStruct.unpack_from( records, offset )
+        data = ArchiveBStruct.unpack_from(records, offset)
         if data['RecType'] == 0:
             log.info('detected archive rev. B')
             self._ARCHIVE_REV_B = True
@@ -354,57 +379,53 @@ class VantagePro(object):
 
         return self._ARCHIVE_REV_B
 
-
     def _wakeup(self):
         '''
         issue wakeup command to device to take out of standby mode.
         '''
         log.info("send: WAKEUP")
         for i in xrange(3):
-            self.port.write('\n')                    # wakeup device
-            ack = self.port.read(len(self.WAKE_ACK)) # read wakeup string
-            log_raw('read',ack)
+            self.port.write('\n')  # wakeup device
+            ack = self.port.read(len(self.WAKE_ACK))  # read wakeup string
+            log_raw('read', ack)
             if ack == self.WAKE_ACK:
                 return
         raise NoDeviceException('Can not access weather station')
 
-
-    def _cmd(self,cmd,*args,**kw):
+    def _cmd(self, cmd, *args, **kw):
         '''
         write a single command, with variable number of arguments. after the
         command, the device must return ACK
         '''
-        ok = kw.setdefault('ok',False)
+        ok = kw.setdefault('ok', False)
 
         self._wakeup()
         if args:
             cmd = "%s %s" % (cmd, ' '.join(str(a) for a in args))
         for i in xrange(3):
             log.info("send: " + cmd)
-            self.port.write( cmd + '\n')
+            self.port.write(cmd + '\n')
             if ok:
                 ack = self.port.read(len(self.OK))  # read OK
-                log_raw('read',ack)
+                log_raw('read', ack)
                 if ack == self.OK:
                     return
             else:
                 ack = self.port.read(len(self.ACK))  # read ACK
-                log_raw('read',ack)
+                log_raw('read', ack)
                 if ack == self.ACK:
                     return
         raise NoDeviceException('Can not access weather station')
-
 
     def _loop_cmd(self):
         '''
         reads a raw string containing data read from the device
         provided (in /dev/XXX) format. all reads are non-blocking.
         '''
-        self._cmd( 'LOOP', 1 )
-        raw = self.port.read( LoopStruct.size ) # read data
-        log_raw('read',raw)
+        self._cmd('LOOP', 1)
+        raw = self.port.read(LoopStruct.size)  # read data
+        log_raw('read', raw)
         return raw
-
 
     def _dmpaft_cmd(self, time_fields):
         '''
@@ -412,44 +433,44 @@ class VantagePro(object):
         '''
         records = []
         # convert time stamp fields to buffer
-        tbuf = struct.pack('2H',*time_fields)
+        tbuf = struct.pack('2H', *time_fields)
 
         # 1. send 'DMPAFT' cmd
         self._cmd('DMPAFT')
 
         # 2. send time stamp + crc
-        crc = VProCRC.get( tbuf )
-        crc = struct.pack('>H',crc)             # crc in big-endian format
+        crc = VProCRC.get(tbuf)
+        crc = struct.pack('>H', crc)  # crc in big-endian format
         log_raw('send', tbuf + crc)
-        self.port.write( tbuf + crc )           # send time stamp + crc
-        ack = self.port.read(len(self.ACK))     # read ACK
-        log_raw('read',ack)
-        if ack != self.ACK: return              # if bad ack, return
+        self.port.write(tbuf + crc)  # send time stamp + crc
+        ack = self.port.read(len(self.ACK))  # read ACK
+        log_raw('read', ack)
+        if ack != self.ACK: return  # if bad ack, return
 
         # 3. read pre-amble data
-        raw = self.port.read( DmpStruct.size )
-        log_raw('read',raw)
-        if not VProCRC.verify( raw ):           # check CRC value
-            log_raw('send ESC',self.ESC)
-            self.port.write( self.ESC )         # if bad, escape and abort
+        raw = self.port.read(DmpStruct.size)
+        log_raw('read', raw)
+        if not VProCRC.verify(raw):  # check CRC value
+            log_raw('send ESC', self.ESC)
+            self.port.write(self.ESC)  # if bad, escape and abort
             return
-        log_raw('send ACK',self.ACK)
-        self.port.write( self.ACK )             # send ACK
+        log_raw('send ACK', self.ACK)
+        self.port.write(self.ACK)  # send ACK
 
         # 4. loop through all page records
         dmp = DmpStruct.unpack(raw)
-        log.info( 'reading %d pages, start offset %d' %
-                (dmp['Pages'],dmp['Offset']))
+        log.info('reading %d pages, start offset %d' %
+                 (dmp['Pages'], dmp['Offset']))
         for i in xrange(dmp['Pages']):
             # 5. read page data
-            raw = self.port.read( DmpPageStruct.size )
-            log_raw('read',raw)
-            if not VProCRC.verify( raw ):       # check CRC value
-                log_raw('send ESC',self.ESC)
-                self.port.write( self.ESC )     # if bad, escape and abort
+            raw = self.port.read(DmpPageStruct.size)
+            log_raw('read', raw)
+            if not VProCRC.verify(raw):  # check CRC value
+                log_raw('send ESC', self.ESC)
+                self.port.write(self.ESC)  # if bad, escape and abort
                 return
-            log_raw('send ACK',self.ACK)
-            self.port.write( self.ACK )         # send ACK
+            log_raw('send ACK', self.ACK)
+            self.port.write(self.ACK)  # send ACK
 
             # 6. loop through archive records
             page = DmpPageStruct.unpack(raw)
@@ -457,25 +478,24 @@ class VantagePro(object):
             if i == 0:
                 offset = dmp['Offset'] * ArchiveAStruct.size
             while offset < ArchiveAStruct.size * 5:
-                log.info( 'page %d, reading record at offset %d' %
-                        (page['Index'],offset))
-                if self._use_rev_b_archive( page['Records'], offset ):
-                    a = ArchiveBStruct.unpack_from( page['Records'], offset )
+                log.info('page %d, reading record at offset %d' %
+                         (page['Index'], offset))
+                if self._use_rev_b_archive(page['Records'], offset):
+                    a = ArchiveBStruct.unpack_from(page['Records'], offset)
                 else:
-                    a = ArchiveAStruct.unpack_from( page['Records'], offset )
+                    a = ArchiveAStruct.unpack_from(page['Records'], offset)
                 # 7. verify that record has valid data, and store
                 if a['DateStamp'] != 0xffff and a['TimeStamp'] != 0xffff:
-                    records.append( a )
+                    records.append(a)
                 offset += ArchiveAStruct.size
         log.info('read all pages')
         return records
 
-
     def _get_loop_fields(self):
         for i in xrange(3):
             raw = self._loop_cmd()  # read raw data
-            crc_ok = VProCRC.verify( raw )
-            if crc_ok: break                # exit loop if valid
+            crc_ok = VProCRC.verify(raw)
+            if crc_ok: break  # exit loop if valid
             time.sleep(1)
 
         if not crc_ok:
@@ -483,14 +503,13 @@ class VantagePro(object):
 
         return LoopStruct.unpack(raw)
 
-
     def _get_new_archive_fields(self):
         '''
         returns a dictionary of fields from the newest archive record in the
         device. return None when no records are new.
         '''
         for i in xrange(3):
-            records = self._dmpaft_cmd( self._archive_time )
+            records = self._dmpaft_cmd(self._archive_time)
             if records is not None: break
             time.sleep(1)
 
@@ -500,26 +519,25 @@ class VantagePro(object):
         # find the newest record
         new_rec = None
         for r in records:
-            new_time = (r['DateStamp'],r['TimeStamp'])
+            new_time = (r['DateStamp'], r['TimeStamp'])
             if self._archive_time < new_time:
                 self._archive_time = new_time
                 new_rec = r
 
         return new_rec
 
-
     def _calc_derived_fields(self, fields):
         '''
         calculates the derived fields (those fields that are calculated)
         '''
         # convenience variables for the calculations below
-        temp        = fields['TempOut']
-        hum         = fields['HumOut']
-        wind        = fields['WindSpeed']
-        wind10min   = fields['WindSpeed10Min']
+        temp = fields['TempOut']
+        hum = fields['HumOut']
+        wind = fields['WindSpeed']
+        wind10min = fields['WindSpeed10Min']
         fields['HeatIndex'] = calc_heat_index(temp, hum)
         fields['WindChill'] = calc_wind_chill(temp, wind, wind10min)
-        fields['DewPoint']  = calc_dewpoint(temp, hum)
+        fields['DewPoint'] = calc_dewpoint(temp, hum)
         # store current data string
         now = time.localtime()
         fields['DateStamp'] = time.strftime("%Y-%m-%d %H:%M:%S", now)
@@ -530,19 +548,17 @@ class VantagePro(object):
         fields['YearUtc'] = now[0]
         fields['MonthUtc'] = str(now[1]).zfill(2)
 
-
     def parse(self):
         '''
         read and parse a set of data read from the console.  after the
         data is parsed it is available in the fields variable.
         '''
-        fields  = self._get_loop_fields()
+        fields = self._get_loop_fields()
         fields['Archive'] = self._get_new_archive_fields()
 
-        self._calc_derived_fields( fields )
+        self._calc_derived_fields(fields)
 
         # set the fields variable the the values in the dict
         self.fields = fields
-
 
 # vim: sts=4:ts=4:sw=4
