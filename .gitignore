@@ -1,4 +1,5 @@
-*.pyc
+/*.pyc
 /build
-./.idea
-./test.py
+/.idea
+test.py
+davisip.log
