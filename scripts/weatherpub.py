@@ -167,7 +167,7 @@ def get_options(parser):
    parser.add_option('-q', '--quiet', dest='quiet', action="store_true",
          default=False, help='disable all console logging')
    parser.add_option('-t', '--tty', dest='tty', default='/dev/ttyS0',
-         help='set serial port device [/dev/ttyS0]')
+         help='set serial socket device [/dev/ttyS0]')
    parser.add_option('-n', '--interval', dest='interval', default=60,
          type='int', help='polling/update interval in seconds [60]')
    return parser.parse_args()

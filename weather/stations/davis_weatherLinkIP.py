@@ -25,9 +25,10 @@ from __future__ import absolute_import
 from ._struct import Struct
 from ..units import *
 
+
 import logging
-import serial
 import struct
+import socket
 import time
 from array import array
 import datetime as dt
@@ -45,7 +46,8 @@ def log_raw(msg, raw):
     log.debug(msg + ': ' + raw.encode('hex'))
 
 
-class NoDeviceException(Exception): pass
+class NoDeviceException(Exception):
+    pass
 
 
 class VProCRC(object):
@@ -320,20 +322,19 @@ class VantagePro(object):
     # archive format type, unknown
     _ARCHIVE_REV_B = None
 
-    def __init__(self, device, log_interval=5, logStartDate=None, clear=False):
+    def __init__(self, ip, port, log_interval=5, logStartDate=None, clear=False):
         '''
         Initialize the serial connection with the console.
-        :param device: /dev/yourConsoleDevice
+        :param ip: your console IP
+        :param port: your console TCP port
         :param log_interval: default 5
         :param logStartDate: the datetime.datetime object representing the starting log date. Default None aka "all"
         :param clear: boolean, if true clean all the log in the console. Default False
         '''
-        self.port = serial.Serial(device, BAUD, timeout=READ_DELAY)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((ip, port))
         # set the logging interval to be downloaded. Default all
-        if logStartDate is None:
-            self._archive_time = (0, 0)
-        else:
-            self._archive_time = (self.calcDateStamp(logStartDate), self.calcTimeStamp(logStartDate))
+        self.setArchiveTime(logStartDate)
         # Clear the whole archive if necessary. Default: no
         if clear:
             self._cmd('CLRLOG')  # prevent getting a full log dump at startup
@@ -355,11 +356,22 @@ class VantagePro(object):
         '''
         return 100 * date.hour + date.minute
 
+    def setArchiveTime(self, date=None):
+        '''
+        set the logging interval to be downloaded. Default all
+        :param date: the datetime object to convert
+        :return: set the self._archive_time attribute
+        '''
+        if date is None:
+            self._archive_time = (0, 0)
+        else:
+            self._archive_time = (self.calcDateStamp(date), self.calcTimeStamp(date))
+
     def __del__(self):
         '''
         close serial socket when object is deleted.
         '''
-        self.port.close()
+        self.socket.close()
 
     def _use_rev_b_archive(self, records, offset):
         '''
@@ -385,8 +397,8 @@ class VantagePro(object):
         '''
         log.info("send: WAKEUP")
         for i in xrange(3):
-            self.port.write('\n')  # wakeup device
-            ack = self.port.read(len(self.WAKE_ACK))  # read wakeup string
+            self.socket.sendall('\n')  # wakeup device
+            ack = self.socket.recv(len(self.WAKE_ACK))  # read wakeup string
             log_raw('read', ack)
             if ack == self.WAKE_ACK:
                 return
@@ -404,14 +416,14 @@ class VantagePro(object):
             cmd = "%s %s" % (cmd, ' '.join(str(a) for a in args))
         for i in xrange(3):
             log.info("send: " + cmd)
-            self.port.write(cmd + '\n')
+            self.socket.sendall(cmd + '\n')
             if ok:
-                ack = self.port.read(len(self.OK))  # read OK
+                ack = self.socket.recv(len(self.OK))  # read OK
                 log_raw('read', ack)
                 if ack == self.OK:
                     return
             else:
-                ack = self.port.read(len(self.ACK))  # read ACK
+                ack = self.socket.recv(len(self.ACK))  # read ACK
                 log_raw('read', ack)
                 if ack == self.ACK:
                     return
@@ -419,11 +431,10 @@ class VantagePro(object):
 
     def _loop_cmd(self):
         '''
-        reads a raw string containing data read from the device
-        provided (in /dev/XXX) format. all reads are non-blocking.
+        reads a raw string containing data read from the console, all reads are non-blocking.
         '''
         self._cmd('LOOP', 1)
-        raw = self.port.read(LoopStruct.size)  # read data
+        raw = self.socket.recv(LoopStruct.size)  # read data
         log_raw('read', raw)
         return raw
 
@@ -442,20 +453,20 @@ class VantagePro(object):
         crc = VProCRC.get(tbuf)
         crc = struct.pack('>H', crc)  # crc in big-endian format
         log_raw('send', tbuf + crc)
-        self.port.write(tbuf + crc)  # send time stamp + crc
-        ack = self.port.read(len(self.ACK))  # read ACK
+        self.socket.sendall(tbuf + crc)  # send time stamp + crc
+        ack = self.socket.recv(len(self.ACK))  # read ACK
         log_raw('read', ack)
         if ack != self.ACK: return  # if bad ack, return
 
         # 3. read pre-amble data
-        raw = self.port.read(DmpStruct.size)
+        raw = self.socket.recv(DmpStruct.size)
         log_raw('read', raw)
         if not VProCRC.verify(raw):  # check CRC value
             log_raw('send ESC', self.ESC)
-            self.port.write(self.ESC)  # if bad, escape and abort
+            self.socket.sendall(self.ESC)  # if bad, escape and abort
             return
         log_raw('send ACK', self.ACK)
-        self.port.write(self.ACK)  # send ACK
+        self.socket.sendall(self.ACK)  # send ACK
 
         # 4. loop through all page records
         dmp = DmpStruct.unpack(raw)
@@ -463,14 +474,14 @@ class VantagePro(object):
                  (dmp['Pages'], dmp['Offset']))
         for i in xrange(dmp['Pages']):
             # 5. read page data
-            raw = self.port.read(DmpPageStruct.size)
+            raw = self.socket.recv(DmpPageStruct.size)
             log_raw('read', raw)
             if not VProCRC.verify(raw):  # check CRC value
                 log_raw('send ESC', self.ESC)
-                self.port.write(self.ESC)  # if bad, escape and abort
+                self.socket.sendall(self.ESC)  # if bad, escape and abort
                 return
             log_raw('send ACK', self.ACK)
-            self.port.write(self.ACK)  # send ACK
+            self.socket.sendall(self.ACK)  # send ACK
 
             # 6. loop through archive records
             page = DmpPageStruct.unpack(raw)
@@ -560,5 +571,3 @@ class VantagePro(object):
 
         # set the fields variable the the values in the dict
         self.fields = fields
-
-# vim: sts=4:ts=4:sw=4
