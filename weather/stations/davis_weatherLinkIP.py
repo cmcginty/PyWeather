@@ -528,13 +528,14 @@ class VantagePro(object):
             raise NoDeviceException('Can not access weather station')
 
         # find the newest record
-        new_rec = None
+        # new_rec = None
+        new_rec = []
         for r in records:
             new_time = (r['DateStamp'], r['TimeStamp'])
             if self._archive_time < new_time:
                 self._archive_time = new_time
-                new_rec = r
-
+                # new_rec = r
+                new_rec.append(r)
         return new_rec
 
     def _calc_derived_fields(self, fields):
@@ -544,30 +545,35 @@ class VantagePro(object):
         # convenience variables for the calculations below
         temp = fields['TempOut']
         hum = fields['HumOut']
-        wind = fields['WindSpeed']
-        wind10min = fields['WindSpeed10Min']
+        wind = fields['WindAvg']
+        # wind10min = fields['WindSpeed10Min']
+        wind10min = None
         fields['HeatIndex'] = calc_heat_index(temp, hum)
         fields['WindChill'] = calc_wind_chill(temp, wind, wind10min)
         fields['DewPoint'] = calc_dewpoint(temp, hum)
         # store current data string
         now = time.localtime()
         fields['DateStamp'] = time.strftime("%Y-%m-%d %H:%M:%S", now)
-        fields['Year'] = now[0]
-        fields['Month'] = str(now[1]).zfill(2)
+        # fields['Year'] = now[0]
+        # fields['Month'] = str(now[1]).zfill(2)
         now = time.gmtime()
         fields['DateStampUtc'] = time.strftime("%Y-%m-%d %H:%M:%S", now)
-        fields['YearUtc'] = now[0]
-        fields['MonthUtc'] = str(now[1]).zfill(2)
+        # fields['YearUtc'] = now[0]
+        # fields['MonthUtc'] = str(now[1]).zfill(2)
 
     def parse(self):
         '''
         read and parse a set of data read from the console.  after the
         data is parsed it is available in the fields variable.
         '''
-        fields = self._get_loop_fields()
-        fields['Archive'] = self._get_new_archive_fields()
+        # fields = self._get_loop_fields()
+        # fields = {}
+        # fields['Archive'] = self._get_new_archive_fields()
 
-        self._calc_derived_fields(fields)
+        fields = self._get_new_archive_fields()
+
+        for i in range(0,fields.__len__()):
+            self._calc_derived_fields(fields[i])
 
         # set the fields variable the the values in the dict
         self.fields = fields
