@@ -13,6 +13,9 @@ All data is returned in a dict structure with value/key pairs. Periodic data is
 only captured once per period. When not active, the keys for periodic data are
 not present in the results.
 
+Author: Paolo Bellagente (p.bellagente@unibs.it)
+Date: 2017-03-15
+
 Author: Patrick C. McGinty (pyweather@tuxcoder.com)
 Date: 2010-06-025
 
