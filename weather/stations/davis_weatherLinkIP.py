@@ -257,6 +257,9 @@ class _ArchiveAStruct(_ArchiveStruct, Struct):
 # --------------------------------------------------------------------------- #
 
 class _ArchiveBStruct(_ArchiveStruct, Struct):
+    '''
+    This represent the structure of the Archive Packet (RevB) returned by the station with the DMPAFT command
+    '''
     FMT = (
         ('DateStamp', 'H'), ('TimeStamp', 'H'), ('TempOut', 'H'),
         ('TempOutHi', 'H'), ('TempOutLow', 'H'), ('RainRate', 'H'),
