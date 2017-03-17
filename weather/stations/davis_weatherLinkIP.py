@@ -14,7 +14,7 @@ only captured once per period. When not active, the keys for periodic data are
 not present in the results.
 
 Author: Paolo Bellagente (p.bellagente@unibs.it)
-Date: 2017-03-15
+Date: 2017-03-17
 
 Author: Patrick C. McGinty (pyweather@tuxcoder.com)
 Date: 2010-06-025
@@ -28,13 +28,13 @@ from __future__ import absolute_import
 from ._struct import Struct
 from ..units import *
 
-
 import logging
 import struct
 import socket
 import time
 from array import array
 import datetime as dt
+import pytz
 
 log = logging.getLogger(__name__)
 
@@ -291,10 +291,31 @@ DmpPageStruct = Struct(
     (('Index', 'B'), ('Records', '260s'), ('unused', '4B'), ('CRC', 'H')),
     order='=')
 
+
+class _TimeStruct(Struct):
+    FMT = (
+        ('Sec', 'B'),
+        ('Min', 'B'),
+        ('Hour', 'B'),
+        ('Day', 'B'),
+        ('Month', 'B'),
+        ('Year', 'B'),
+        ('CRC', 'H'),
+    )
+
+    def __init__(self):
+        super(_TimeStruct, self).__init__(self.FMT, '=')
+
+    def _post_unpack(self, items):
+        items['Year'] = items['Year'] + 1900
+        return items
+
+
 # init structure classes
 LoopStruct = LoopStruct()
 ArchiveAStruct = _ArchiveAStruct()
 ArchiveBStruct = _ArchiveBStruct()
+timeStruct = _TimeStruct()
 
 
 ##############################################################################
@@ -575,8 +596,42 @@ class VantagePro(object):
 
         fields = self._get_new_archive_fields()
 
-        for i in range(0,fields.__len__()):
+        for i in range(0, fields.__len__()):
             self._calc_derived_fields(fields[i])
 
         # set the fields variable the the values in the dict
         self.fields = fields
+
+    def getTime(self):
+        '''
+        Get the current time from the console
+        :returns: the current time in datetime format
+        '''
+        for i in xrange(3):
+            self._cmd('GETTIME')
+            raw = self.socket.recv(timeStruct.size)  # read data
+            log_raw('read', raw)
+            # raw = self._loop_cmd()  # read raw data
+            crc_ok = VProCRC.verify(raw)
+            if crc_ok: break  # exit loop if valid
+            time.sleep(1)
+        if not crc_ok:
+            raise NoDeviceException('Can not access weather station')
+        tStruct = timeStruct.unpack(raw)
+        return dt.datetime(tStruct['Year'], tStruct['Month'], tStruct['Day'], tStruct['Hour'], tStruct['Min'],
+                           tStruct['Sec'])
+
+    def setTime(self, t):
+        '''
+        Send the SETTIME command to the console and set the station local time to t
+        :param t: the datetime.datetime object with the date and time to be set
+        '''
+        time_fields = (t.second, t.minute, t.hour, t.day, t.month, t.year - 1900)
+        tbuf = struct.pack('6B', *time_fields)
+        # print tbuf
+        self._cmd('SETTIME')
+        crc = VProCRC.get(tbuf)
+        crc = struct.pack('>H', crc)  # crc in big-endian format
+        self.socket.sendall(tbuf + crc)  # send time stamp + crc
+        ack = self.socket.recv(len(self.ACK))  # read ACK
+        if ack != self.ACK: return  # if bad ack, return
