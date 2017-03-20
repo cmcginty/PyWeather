@@ -6,7 +6,7 @@
 # See __usage__ for an explanation of runtime arguments.
 #
 # -Christopher Blunck
-#
+# update 20/03/2017 Paolo Bellagente (p.bellagente@unibs.it)
 
 import sys
 
@@ -61,6 +61,22 @@ def in60_to_atm(inches):
 def in60_to_lbs(inches):
     'Inches of mercury @60F (inHg60) to pounds/square inch (lb/in**2)'
     return inches * 0.48977
+
+def incConv_to_Pa(inches):
+    '''
+    Inches of mercury to Pascals using the NIST conventional coefficient, see https://www.nist.gov/physical-measurement-laboratory/nist-guide-si-appendix-b8#I
+    :param inches: inches of mg
+    :return: pascals
+    '''
+    return inches * 3.386389
+
+def incConv_to_kPa(inches):
+    '''
+    Inches of mercury to kilo Pascals using the NIST conventional coefficient, see https://www.nist.gov/physical-measurement-laboratory/nist-guide-si-appendix-b8#I
+    :param inches: inches of mg
+    :return: pascals
+    '''
+    return incConv_to_Pa(inches)*1000
 
 def mb_to_atm(mb):
     'Millibars (mb) to atmospheres (atm)'
@@ -156,3 +172,6 @@ def lb_sqin_to_mb(lbs):
 
 def hpa_to_inches(hpa):
     return hpa / 33.87
+
+
+
