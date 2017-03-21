@@ -261,16 +261,77 @@ class _ArchiveBStruct(_ArchiveStruct, Struct):
     This represent the structure of the Archive Packet (RevB) returned by the station with the DMPAFT command
     '''
     FMT = (
-        ('DateStamp', 'H'), ('TimeStamp', 'H'), ('TempOut', 'H'),
-        ('TempOutHi', 'H'), ('TempOutLow', 'H'), ('RainRate', 'H'),
-        ('RainRateHi', 'H'), ('Pressure', 'H'), ('SolarRad', 'H'),
-        ('WindSamps', 'H'), ('TempIn', 'H'), ('HumIn', 'B'),
-        ('HumOut', 'B'), ('WindAvg', 'B'), ('WindHi', 'B'),
-        ('WindHiDir', 'B'), ('WindAvgDir', 'B'), ('UV', 'B'),
-        ('ETHour', 'B'), ('SolarRadHi', 'H'), ('UVHi', 'B'),
-        ('ForecastRuleNo', 'B'), ('LeafTemps', '2s'), ('LeafWetness', '2s'),
-        ('SoilTemps', '4s'), ('RecType', 'B'), ('ExtraHum', '2s'),
-        ('ExtraTemps', '3s'), ('SoilMoist', '4s'),
+        # These 16 bits hold the date that the archive was written in the following format:
+        # Year (7 bits) | Month (4 bits) | Day (5 bits) or: day + month*32 + (year-2000)*512)
+        ('DateStamp', 'H'),
+        # Time on the Vantage that the archive record was
+        # written:
+        # (Hour * 100) + minute.
+        ('TimeStamp', 'H'),
+        # Either the Average Outside Temperature, or the
+        # Final Outside Temperature over the archive period.
+        # Units are (°F / 10)
+        ('TempOut', 'H'),
+        # Highest Outside Temp over the archive period.
+        ('TempOutHi', 'H'),
+        # Lowest Outside Temp over the archive period.
+        ('TempOutLow', 'H'),
+        # Number of rain clicks over the archive period
+        ('RainRate', 'H'),
+        # Highest rain rate over the archive period, or the rate
+        # shown on the console at the end of the period if there
+        # was no rain. Units are (rain clicks / hour)
+        ('RainRateHi', 'H'),
+        # Barometer reading at the end of the archive period.
+        # Units are (in Hg / 1000).
+        ('Barometer', 'H'),
+        # Average Solar Rad over the archive period.
+        # Units are (Watts / m 2 )
+        ('SolarRad', 'H'),
+        # Number of packets containing wind speed data
+        # received from the ISS or wireless anemometer.
+        ('WindSamps', 'H'),
+        # Either the Average Inside Temperature, or the Final
+        # Inside Temperature over the archive period. Units
+        # are (°F / 10)
+        ('TempIn', 'H'),
+        # Inside Humidity at the end of the archive period
+        ('HumIn', 'B'),
+        # Outside Humidity at the end of the archive period
+        ('HumOut', 'B'),
+        # Average Wind Speed over the archive interval. Units are (MPH)
+        ('WindAvg', 'B'),
+        # Highest Wind Speed over the archive interval. Unita are (MPH)
+        ('WindHi', 'B'),
+        # Direction code of the High Wind speed. 0 = N, 1 = NNE, 2 = NE, ... 14 = NW, 15 = NNW, 255 = Dashed
+        ('WindHiDir', 'B'),
+        # Prevailing or Dominant Wind Direction code. 0 = N, 1 = NNE, 2 = NE, ... 14 = NW, 15 = NNW, 255 = Dashed Firmware
+        # before July 8, 2001 does not report direction code 255
+        ('WindAvgDir', 'B'),
+        # Average UV Index. Units are (UV Index / 10)
+        ('UV', 'B'),
+        # ET accumulated over the last hour. Only records "on the hour" will have a non-zero value. Units are (in /1000)
+        ('ETHour', 'B'),
+        # Highest Solar Rad value over the archive period. Units are (Watts / m 2)
+        ('SolarRadHi', 'H'),
+        # Highest UV Index value over the archive period. Units are (Watts / m 2 )
+        ('UVHi', 'B'),
+        # Weather forecast rule at the end of the archive period.
+        ('ForecastRuleNo', 'B'),
+        # 2 Leaf Temperature values. Units are (°F + 90)
+        ('LeafTemps', '2s'),
+        # 2 Leaf Wetness values. Range is 0 – 15
+        ('LeafWetness', '2s'),
+        # 4 Soil Temperatures. Units are (°F + 90)
+        ('SoilTemps', '4s'),
+        # 0xFF = Rev A, 0x00 = Rev B archive record
+        ('RecType', 'B'),
+        # 2 Extra Humidity values
+        ('ExtraHum', '2s'),
+        # 3 Extra Temperature values. Units are (°F + 90)
+        ('ExtraTemps', '3s'),
+        # 4 Soil Moisture values. Units are (cb)
+        ('SoilMoist', '4s'),
     )
 
     def _post_unpack(self, items):
