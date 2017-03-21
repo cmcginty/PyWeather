@@ -270,7 +270,7 @@ class _ArchiveBStruct(_ArchiveStruct, Struct):
         ('TimeStamp', 'H'),
         # Either the Average Outside Temperature, or the
         # Final Outside Temperature over the archive period.
-        # Units are (°F / 10)
+        # Units are (F / 10)
         ('TempOut', 'H'),
         # Highest Outside Temp over the archive period.
         ('TempOutHi', 'H'),
@@ -293,7 +293,7 @@ class _ArchiveBStruct(_ArchiveStruct, Struct):
         ('WindSamps', 'H'),
         # Either the Average Inside Temperature, or the Final
         # Inside Temperature over the archive period. Units
-        # are (°F / 10)
+        # are (F / 10)
         ('TempIn', 'H'),
         # Inside Humidity at the end of the archive period
         ('HumIn', 'B'),
@@ -318,17 +318,17 @@ class _ArchiveBStruct(_ArchiveStruct, Struct):
         ('UVHi', 'B'),
         # Weather forecast rule at the end of the archive period.
         ('ForecastRuleNo', 'B'),
-        # 2 Leaf Temperature values. Units are (°F + 90)
+        # 2 Leaf Temperature values. Units are (F + 90)
         ('LeafTemps', '2s'),
-        # 2 Leaf Wetness values. Range is 0 – 15
+        # 2 Leaf Wetness values. Range is 0-15
         ('LeafWetness', '2s'),
-        # 4 Soil Temperatures. Units are (°F + 90)
+        # 4 Soil Temperatures. Units are (F + 90)
         ('SoilTemps', '4s'),
         # 0xFF = Rev A, 0x00 = Rev B archive record
         ('RecType', 'B'),
         # 2 Extra Humidity values
         ('ExtraHum', '2s'),
-        # 3 Extra Temperature values. Units are (°F + 90)
+        # 3 Extra Temperature values. Units are (F + 90)
         ('ExtraTemps', '3s'),
         # 4 Soil Moisture values. Units are (cb)
         ('SoilMoist', '4s'),
