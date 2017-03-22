@@ -209,7 +209,7 @@ class _ArchiveStruct(object):
         items['TempOut'] = items['TempOut'] / 10.0
         items['TempOutHi'] = items['TempOutHi'] / 10.0
         items['TempOutLow'] = items['TempOutLow'] / 10.0
-        items['Pressure'] = items['Pressure'] / 1000.0
+        items['Barometer'] = items['Barometer'] / 1000.0
         items['TempIn'] = items['TempIn'] / 10.0
         items['UV'] = items['UV'] / 10.0
         items['ETHour'] = items['ETHour'] / 1000.0
@@ -425,7 +425,7 @@ class VantagePro(object):
         self.setArchiveTime(logStartDate)
         # Clear the whole archive if necessary. Default: no
         if clear:
-            self._cmd('CLRLOG')  # prevent getting a full log dump at startup
+             self.clearLog() # prevent getting a full log dump at startup
         self._cmd('SETPER', log_interval, ok=True)
 
     def calcDateStamp(self, date):
@@ -699,3 +699,9 @@ class VantagePro(object):
         self.socket.sendall(tbuf + crc)  # send time stamp + crc
         ack = self.socket.recv(len(self.ACK))  # read ACK
         if ack != self.ACK: return  # if bad ack, return
+
+    def clearLog(self):
+        '''
+        send the CLEARLOG command
+        '''
+        self._cmd('CLRLOG')
