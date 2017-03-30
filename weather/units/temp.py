@@ -18,50 +18,60 @@ __doc__ = 'temperature related conversionfunctions'
 __usage__ = 'this module should not be run via the command line'
 
 
-
 def celsius_to_fahrenheit(c):
     'Degrees Celsius (C) to degrees Fahrenheit (F)'
     return (c * 1.8) + 32.0
+
 
 def celsius_to_kelvin(c):
     'Degrees Celsius (C) to degrees Kelvin (K)'
     return c + 273.15
 
+
 def celsius_to_rankine(c):
     'Degrees Celsius (C) to degrees Rankine (R)'
     return (c * 1.8) + 491.67
+
 
 def fahrenheit_to_celsius(f):
     'Degrees Fahrenheit (F) to degrees Celsius (C)'
     return (f - 32.0) * 0.555556
 
+
 def fahrenheit_to_kelvin(f):
     'Degrees Fahrenheit (F) to degrees Kelvin (K)'
     return (f * 0.555556) + 255.37
+
 
 def fahrenheit_to_rankine(f):
     'Degrees Fahrenheit (F) to degrees Rankine (R)'
     return f + 459.67
 
+
 def kelvin_to_celsius(k):
     'Degrees Kelvin (K) to degrees Celsius (C)'
     return k - 273.15
+
 
 def kelvin_to_fahrenheit(k):
     'Degrees Kelvin (K) to degrees Fahrenheit (F)'
     return (k - 255.37) * 1.8
 
+
 def kelvin_to_rankine(k):
     'Degrees Kelvin (K) to degrees Rankine (R)'
     return k * 1.8
+
 
 def rankine_to_celsius(r):
     'Degrees Rankine (R) to degrees Celsius (C)'
     return (r - 491.67) * 0.555556
 
+
 def rankine_to_fahrenheit(r):
     'Degrees Rankine (R) to degrees Fahrenheit (F)'
     return r - 459.67
+
 
 def rankine_to_kelvin(r):
     'Degrees Rankine (R) to degrees Kelvin (K)'
@@ -75,15 +85,17 @@ def calc_heat_index(temp, hum):
 
     returns the heat index in degrees F.
     '''
-    
+
     if (temp < 80):
         return temp
     else:
         return -42.379 + 2.04901523 * temp + 10.14333127 * hum - 0.22475541 * \
-               temp * hum - 6.83783 * (10 ** -3) * (temp ** 2) - 5.481717 * \
-               (10 ** -2) * (hum ** 2) + 1.22874 * (10 ** -3) * (temp ** 2) * \
-               hum + 8.5282 * (10 ** -4) * temp * (hum ** 2) - 1.99 * \
-               (10 ** -6) * (temp ** 2) * (hum ** 2);
+                                                                 temp * hum - 6.83783 * (10 ** -3) * (
+        temp ** 2) - 5.481717 * \
+                     (10 ** -2) * (hum ** 2) + 1.22874 * (10 ** -3) * (temp ** 2) * \
+                                               hum + 8.5282 * (10 ** -4) * temp * (hum ** 2) - 1.99 * \
+                                                                                               (10 ** -6) * (
+                                                                                               temp ** 2) * (hum ** 2);
 
 
 def calc_wind_chill(t, windspeed, windspeed10min=None):
@@ -111,7 +123,7 @@ def calc_humidity(temp, dewpoint):
     denom = 112 + (0.9 * t)
 
     rh = math.pow((num / denom), 8)
-    
+
     return rh
 
 
@@ -130,3 +142,18 @@ def calc_dewpoint(temp, hum):
     dewpoint = c - dewpoint;
 
     return celsius_to_fahrenheit(dewpoint)
+
+
+def calc_dewpoint_davis(temp, hum):
+    '''
+    calculate the dewpoint via the formula used by Davis. See Davis Application Note 28 - Derived Variables in Davis
+    Weather Products.
+    :author: Paolo Bellagente (p.bellagente@unibs.it - 23/03/2017
+    :param temp: Outside temperature in F
+    :param hum: Relative outside humidity
+    :return: the dewpoint in F
+    '''
+    v = hum*0.01*6.112*math.exp((17.62*temp)/(temp+243.12))
+    N= 243.12*(math.log(v))-440.1
+    D=19.43 - math.log(v)
+    return N/D

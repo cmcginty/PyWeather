@@ -639,6 +639,7 @@ class VantagePro(object):
         fields['HeatIndex'] = calc_heat_index(temp, hum)
         fields['WindChill'] = calc_wind_chill(temp, wind, wind10min)
         fields['DewPoint'] = calc_dewpoint(temp, hum)
+        fields['DewPointDavis'] = calc_dewpoint_davis(temp, hum)
         # store current data string
         now = time.localtime()
         fields['DateStamp'] = time.strftime("%Y-%m-%d %H:%M:%S", now)
