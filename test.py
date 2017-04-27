@@ -16,7 +16,7 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=lo
 
 if __name__ == '__main__':
     # Console IP
-    IP = "xxx.xxx.xxx.xxx"
+    IP = "x.x.x.x"
     # Davis default port
     PORT = 22222
     # Console logging interval in minutes Valid values are (1, 5, 10, 15, 30, 60, and 120). Results are undefined if you try to select an archive period not on the list.
