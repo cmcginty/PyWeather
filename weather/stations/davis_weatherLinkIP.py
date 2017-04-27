@@ -212,9 +212,8 @@ class _ArchiveStruct(object):
         items['Barometer'] = items['Barometer'] / 1000.0
         items['TempIn'] = items['TempIn'] / 10.0
         items['UV'] = items['UV'] / 10.0
+        items['UVHi'] = items['UVHi'] / 10.0
         items['ETHour'] = items['ETHour'] / 1000.0
-        items['WindHiDir'] = int(items['WindHiDir'] * 22.5)
-        items['WindHiDir'] = int(items['WindAvgDir'] * 22.5)
         items['SoilTemps'] = tuple(
             t - 90 for t in struct.unpack('4B', items['SoilTemps']))
         items['ExtraHum'] = struct.unpack('2B', items['ExtraHum'])
@@ -301,7 +300,7 @@ class _ArchiveBStruct(_ArchiveStruct, Struct):
         ('HumOut', 'B'),
         # Average Wind Speed over the archive interval. Units are (MPH)
         ('WindAvg', 'B'),
-        # Highest Wind Speed over the archive interval. Unita are (MPH)
+        # Highest Wind Speed over the archive interval. Units are (MPH)
         ('WindHi', 'B'),
         # Direction code of the High Wind speed. 0 = N, 1 = NNE, 2 = NE, ... 14 = NW, 15 = NNW, 255 = Dashed
         ('WindHiDir', 'B'),
@@ -314,7 +313,7 @@ class _ArchiveBStruct(_ArchiveStruct, Struct):
         ('ETHour', 'B'),
         # Highest Solar Rad value over the archive period. Units are (Watts / m 2)
         ('SolarRadHi', 'H'),
-        # Highest UV Index value over the archive period. Units are (Watts / m 2 )
+        # Highest UV Index value over the archive period.
         ('UVHi', 'B'),
         # Weather forecast rule at the end of the archive period.
         ('ForecastRuleNo', 'B'),
@@ -421,11 +420,12 @@ class VantagePro(object):
         '''
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((ip, port))
+        self.socket.settimeout(600)  # set the TPC socket timeout to 600 sec
         # set the logging interval to be downloaded. Default all
         self.setArchiveTime(logStartDate)
         # Clear the whole archive if necessary. Default: no
         if clear:
-             self.clearLog() # prevent getting a full log dump at startup
+            self.clearLog()  # prevent getting a full log dump at startup
         self._cmd('SETPER', log_interval, ok=True)
 
     def calcDateStamp(self, date):

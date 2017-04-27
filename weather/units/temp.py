@@ -8,7 +8,7 @@
 # -Christopher Blunck
 #
 
-import sys, math
+import sys, math, logging
 
 __author__ = 'Christopher Blunck'
 __email__ = 'chris@wxnet.org'
@@ -86,28 +86,37 @@ def calc_heat_index(temp, hum):
     returns the heat index in degrees F.
     '''
 
-    if (temp < 80):
-        return temp
+    hi = (0.5 * (temp + 61.0 + ((temp - 68.0) * 1.2) + (hum * 0.094)))
+    if (hi+temp)/2.0 < 80:
+        return hi
     else:
-        return -42.379 + 2.04901523 * temp + 10.14333127 * hum - 0.22475541 * \
-                                                                 temp * hum - 6.83783 * (10 ** -3) * (
-        temp ** 2) - 5.481717 * \
-                     (10 ** -2) * (hum ** 2) + 1.22874 * (10 ** -3) * (temp ** 2) * \
-                                               hum + 8.5282 * (10 ** -4) * temp * (hum ** 2) - 1.99 * \
-                                                                                               (10 ** -6) * (
-                                                                                               temp ** 2) * (hum ** 2);
+        hi = -42.379 + 2.04901523 * temp + 10.14333127 * hum - 0.22475541 * temp * hum - 6.83783 * (10 ** -3) * (
+            temp ** 2) - 5.481717 * (10 ** -2) * (hum ** 2) + 1.22874 * (10 ** -3) * (temp ** 2) * hum + 8.5282 * (
+            10 ** -4) * temp * (hum ** 2) - 1.99 * (10 ** -6) * (temp ** 2) * (hum ** 2)
+
+        if hum < 13 and (80 <= temp <= 112):
+            #  [(13-RH)/4]*SQRT{[17-ABS(T-95.)]/17}
+            hi -= (((13 - hum) / 4) * math.sqrt((17 - math.fabs(temp - 95.0)) / 17))
+        elif hum > 85 and (80 <= temp <= 87):
+            #  [(RH-85)/10] * [(87-T)/5]
+            hi += ((hum - 85) / 10) * ((87 - temp) / 5)
+        return hi
 
 
 def calc_wind_chill(t, windspeed, windspeed10min=None):
     '''
     calculates the wind chill value based upon the temperature (F) and
     wind.
-
     returns the wind chill in degrees F.
     '''
 
     w = max(windspeed10min, windspeed)
-    return 35.74 + 0.6215 * t - 35.75 * (w ** 0.16) + 0.4275 * t * (w ** 0.16);
+    windChill = 35.74 + 0.6215 * t - 35.75 * (w ** 0.16) + 0.4275 * t * (w ** 0.16)
+    if windChill > t:
+        logging.warning("WindChill "+str(windChill)+" truncated to ambient temperature "+str(t))
+        return t
+    else:
+        return windChill
 
 
 def calc_humidity(temp, dewpoint):
@@ -153,7 +162,7 @@ def calc_dewpoint_davis(temp, hum):
     :param hum: Relative outside humidity
     :return: the dewpoint in F
     '''
-    v = hum*0.01*6.112*math.exp((17.62*temp)/(temp+243.12))
-    N= 243.12*(math.log(v))-440.1
-    D=19.43 - math.log(v)
-    return N/D
+    v = hum * 0.01 * 6.112 * math.exp((17.62 * temp) / (temp + 243.12))
+    N = 243.12 * (math.log(v)) - 440.1
+    D = 19.43 - math.log(v)
+    return N / D
