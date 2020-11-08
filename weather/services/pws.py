@@ -31,7 +31,7 @@ Author: Patrick C. McGinty (pyweather@tuxcoder.com)
 Date: Tuesday, July 13 2010
 '''
 
-from __future__ import absolute_import
+
 
 import logging
 log = logging.getLogger(__name__)

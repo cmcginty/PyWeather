@@ -45,7 +45,7 @@ Author: Christopher Blunck (chris@wxnet.org)
 Date: 2006-03-27
 '''
 
-from __future__ import absolute_import
+
 
 import logging
 log = logging.getLogger(__name__)

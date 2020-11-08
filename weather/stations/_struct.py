@@ -9,7 +9,7 @@ Author: Patrick C. McGinty (pyweather@tuxcoder.com)
 Date: 2010-06-025
 '''
 
-from __future__ import absolute_import
+
 
 import struct
 
@@ -26,7 +26,7 @@ class Struct( struct.Struct ):
         See `struct.Struct` class defintion.
     '''
     def __init__(self, fmt, order='@'):
-        self.fields, fmt_t = zip(*fmt)
+        self.fields, fmt_t = list(zip(*fmt))
         super(Struct,self).__init__( order + ''.join(fmt_t) )
 
 
@@ -43,7 +43,7 @@ class Struct( struct.Struct ):
         fields can be post-processed by extending the _post_unpack() method.
         '''
         data = super(Struct,self).unpack_from( buf, offset)
-        items = dict(zip(self.fields,data))
+        items = dict(list(zip(self.fields,data)))
         return self._post_unpack(items)
 
 

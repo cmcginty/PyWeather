@@ -32,9 +32,9 @@ Author: Patrick C. McGinty (pyweather@tuxcoder.com)
 Date: Thursday, July 15 2010
 '''
 
-from __future__ import absolute_import
 
-import StringIO
+
+import io
 import logging
 log = logging.getLogger(__name__)
 
@@ -75,8 +75,8 @@ class TextFile(object):
       Write output file.
       '''
       with open( self.file_name, 'w') as fh:
-         for k,v in self.args.iteritems():
-            buf = StringIO.StringIO()
+         for k,v in self.args.items():
+            buf = io.StringIO()
             buf.write(k)
             self._append_vals(buf,v)
             fh.write(buf.getvalue() + '\n')

@@ -1,3 +1,3 @@
-from wunderground import *
-from pws import *
-from file import *
+from .wunderground import *
+from .pws import *
+from .file import *

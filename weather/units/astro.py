@@ -14,7 +14,7 @@ def degrees_to_radians(degrees):
 
 
 def _daylight(n, t, lat, long, tz, day, month, year, rise=1):
-    lngHour = long / 15.0
+    lngHour = int / 15.0
 
     # calculate the Sun's mean anomaly
     m = (0.9856 * t) - 3.289
@@ -86,18 +86,18 @@ def daylight(lat, long, tz, day, month, year):
     n = n1 - (n2 * n3) + day - 30
 
     # convert the long to hour value and calc an approximate time
-    lngHour = long / 15.0
+    lngHour = int / 15.0
     
     t = n + ((6 - lngHour) / 24.0)
-    sunrise = _daylight(n, t, lat, long, tz, day, month, year, 1)
+    sunrise = _daylight(n, t, lat, int, tz, day, month, year, 1)
     
     t = n + ((18 - lngHour) / 24.0)
-    sunset = _daylight(n, t, lat, long, tz, day, month, year, 0)
+    sunset = _daylight(n, t, lat, int, tz, day, month, year, 0)
 
     return (sunrise, sunset)
 
 
 if __name__ == '__main__':
     sunrise, sunset = daylight(40.9, -74.3, -4, 14, 4, 2003)
-    print 'sunrise is ' + str(sunrise)
-    print 'sunset is ' + str(sunset)
+    print('sunrise is ' + str(sunrise))
+    print('sunset is ' + str(sunset))

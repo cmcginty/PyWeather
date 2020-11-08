@@ -2,7 +2,7 @@
 Common base classes for PyWeather pulication services.
 '''
 
-from __future__ import absolute_import
+
 
 import logging
 log = logging.getLogger(__name__)
@@ -37,10 +37,10 @@ class HttpPublisher(object):
 
    @staticmethod
    def _publish(args, server, uri):
-      from httplib import HTTPConnection
-      from urllib import urlencode
+      from http.client import HTTPConnection
+      from urllib.parse import urlencode
 
-      args = dict((k,v) for k,v in args.items() if v != 'NA')
+      args = dict((k,v) for k,v in list(args.items()) if v != 'NA')
       uri = uri + "?" + urlencode(args)
 
       log.debug('Connect to: http://%s' % server)

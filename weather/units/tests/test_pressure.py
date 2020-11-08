@@ -8,7 +8,7 @@
 # -Christopher Blunck
 #
 
-from __future__ import absolute_import
+
 
 import unittest
 
@@ -28,7 +28,7 @@ __usage__ = '''
 
 
 def usage():
-    print __usage__
+    print(__usage__)
     sys.exit(1)
 
 
