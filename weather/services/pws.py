@@ -88,8 +88,7 @@ class PwsWeather(HttpPublisher):
 
    def publish(self):
       http = super(PwsWeather,self).publish()
-      if not http[2].find('Logged and posted') >= 0:
+      if not http[2].find(b'Logged and posted') >= 0:
          raise PublishException('Server returned invalid status: %d %s %s'
               % http)
       return http
-
