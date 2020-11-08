@@ -223,10 +223,15 @@ class TestCase(unittest.TestCase):
 
     def test__mm60_to_mb(self):
         # make sure some hard-coded values work
-        assert round(mm60_to_mb(787), 4) == 1046.2929, "value not correct"
-        assert round(mm60_to_mb(759), 4) == 1009.0677, "value not correct"
-        assert round(mm60_to_mb(704), 4) == 935.9469, "value not correct"
-        assert round(mm60_to_mb(675), 4) == 897.3923, "value not correct"
+        for p, expected in [(787, 1046.2929),
+                            (759, 1009.0677),
+                            (704, 935.9469),
+                            (675, 897.3923)]:
+            self.assertAlmostEqual(
+                mm60_to_mb(p),
+                expected,
+                places=4,
+                msg=f"Incorrect conversion for {p}")
 
 
     def test__n_sqm_to_mb(self):
