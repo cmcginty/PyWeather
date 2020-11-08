@@ -75,7 +75,7 @@ def calc_heat_index(temp, hum):
 
     returns the heat index in degrees F.
     '''
-    
+
     if (temp < 80):
         return temp
     else:
@@ -94,7 +94,7 @@ def calc_wind_chill(t, windspeed, windspeed10min=None):
     returns the wind chill in degrees F.
     '''
 
-    w = max(windspeed10min, windspeed)
+    w = max(windspeed10min or 0, windspeed)
     return 35.74 + 0.6215 * t - 35.75 * (w ** 0.16) + 0.4275 * t * (w ** 0.16);
 
 
@@ -111,7 +111,7 @@ def calc_humidity(temp, dewpoint):
     denom = 112 + (0.9 * t)
 
     rh = math.pow((num / denom), 8)
-    
+
     return rh
 
 
