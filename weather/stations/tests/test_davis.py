@@ -1,33 +1,35 @@
 
 
+import codecs
 import unittest
-from mock import Mock, patch_object
+import mock
 
 from ..davis import VProCRC, VantagePro, LoopStruct
 
-loop_data = "4c4f4f14003e032175da0239d10204056301ffffffffffffffffffff" \
-    "ffffffffff4effffffffffffff0000ffff7f0000ffff000000000000000000000000ffff" \
-    "ffffffffff0000000000000000000000000000000000002703064b26023e070a0d1163"
+loop_data = (
+    b"4c4f4f14003e032175da0239d10204056301ffffffffffffffffffff"
+    b"ffffffffff4effffffffffffff0000ffff7f0000ffff000000000000000000000000ffff"
+    b"ffffffffff0000000000000000000000000000000000002703064b26023e070a0d1163")
 
 class TestCRC(unittest.TestCase):
 
     def test_crc(self):
-        raw = loop_data.decode('hex')
+        raw = codecs.decode(loop_data, 'hex')
         result = VProCRC.verify( raw )
         self.assertTrue(result)
 
 
 class TestParse(unittest.TestCase):
-    cmd_mock = Mock()   # for mocking '_cmd' method in 'vp'
-    loop_mock = Mock()  # for mocking '_loop_cmd' method in 'vp'
+    cmd_mock = mock.Mock()   # for mocking '_cmd' method in 'vp'
+    loop_mock = mock.Mock()  # for mocking '_loop_cmd' method in 'vp'
 
     def test_unpack_loop_data(self):
-        LoopStruct.unpack(loop_data.decode('hex'))
+        LoopStruct.unpack(codecs.decode(loop_data, 'hex'))
 
-    @patch_object(VantagePro, '_cmd', cmd_mock )
-    @patch_object(VantagePro, '_loop_cmd', loop_mock )
+    @mock.patch.object(VantagePro, '_cmd', cmd_mock )
+    @mock.patch.object(VantagePro, '_loop_cmd', loop_mock )
     def test_fields(self):
-        self.loop_mock.return_value = loop_data.decode('hex')
+        self.loop_mock.return_value = codecs.decode(loop_data, 'hex')
         vp = VantagePro('/dev/ttyS0')
         fields = vp._get_loop_fields()
 
@@ -59,10 +61,10 @@ class TestParse(unittest.TestCase):
         self.assertEqual( fields['SunRise'], '05:50' )
         self.assertEqual( fields['SunSet'], '18:54' )
 
-    @patch_object(VantagePro, '_cmd', cmd_mock )
-    @patch_object(VantagePro, '_loop_cmd', loop_mock )
+    @mock.patch.object(VantagePro, '_cmd', cmd_mock )
+    @mock.patch.object(VantagePro, '_loop_cmd', loop_mock )
     def test_derived_fields(self):
-        self.loop_mock.return_value = loop_data.decode('hex')
+        self.loop_mock.return_value = codecs.decode(loop_data, 'hex')
         vp = VantagePro('/dev/ttyS0')
         fields = vp._get_loop_fields()
         vp._calc_derived_fields(fields)
