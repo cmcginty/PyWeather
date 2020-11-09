@@ -31,8 +31,8 @@ setup(name = name,
       author_email = "pyweather@tuxcoder.com, chris@wxnet.org",
       url = "http://github.com/cmcginty/PyWeather",
       download_url =
-         "http://github.com/cmcginty/PyWeather/raw/master/dist/%s-%s.tar.gz" %
-         (name,pkg.__version__),
+         "https://github.com/cmcginty/PyWeather/archive/%s.zip" %
+         pkg.__version__,
       packages= [
          name,
          name+'.services',
