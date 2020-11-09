@@ -8,9 +8,11 @@ __version__ = '0.10.0'
 
 import logging
 
+
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
+
 # init a null handler, to prevent warnings
-logging.getLogger(__name__).addHandler( NullHandler() )
+logging.getLogger(__name__).addHandler(NullHandler())
