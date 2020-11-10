@@ -8,7 +8,8 @@
 # -Christopher Blunck
 #
 
-import sys, math
+import math
+import sys
 
 __author__ = 'Christopher Blunck'
 __email__ = 'chris@wxnet.org'
@@ -18,50 +19,60 @@ __doc__ = 'temperature related conversionfunctions'
 __usage__ = 'this module should not be run via the command line'
 
 
-
 def celsius_to_fahrenheit(c):
     'Degrees Celsius (C) to degrees Fahrenheit (F)'
     return (c * 1.8) + 32.0
+
 
 def celsius_to_kelvin(c):
     'Degrees Celsius (C) to degrees Kelvin (K)'
     return c + 273.15
 
+
 def celsius_to_rankine(c):
     'Degrees Celsius (C) to degrees Rankine (R)'
     return (c * 1.8) + 491.67
+
 
 def fahrenheit_to_celsius(f):
     'Degrees Fahrenheit (F) to degrees Celsius (C)'
     return (f - 32.0) * 0.555556
 
+
 def fahrenheit_to_kelvin(f):
     'Degrees Fahrenheit (F) to degrees Kelvin (K)'
     return (f * 0.555556) + 255.37
+
 
 def fahrenheit_to_rankine(f):
     'Degrees Fahrenheit (F) to degrees Rankine (R)'
     return f + 459.67
 
+
 def kelvin_to_celsius(k):
     'Degrees Kelvin (K) to degrees Celsius (C)'
     return k - 273.15
+
 
 def kelvin_to_fahrenheit(k):
     'Degrees Kelvin (K) to degrees Fahrenheit (F)'
     return (k - 255.37) * 1.8
 
+
 def kelvin_to_rankine(k):
     'Degrees Kelvin (K) to degrees Rankine (R)'
     return k * 1.8
+
 
 def rankine_to_celsius(r):
     'Degrees Rankine (R) to degrees Celsius (C)'
     return (r - 491.67) * 0.555556
 
+
 def rankine_to_fahrenheit(r):
     'Degrees Rankine (R) to degrees Fahrenheit (F)'
     return r - 459.67
+
 
 def rankine_to_kelvin(r):
     'Degrees Rankine (R) to degrees Kelvin (K)'
@@ -75,7 +86,7 @@ def calc_heat_index(temp, hum):
 
     returns the heat index in degrees F.
     '''
-    
+
     if (temp < 80):
         return temp
     else:
@@ -83,7 +94,7 @@ def calc_heat_index(temp, hum):
                temp * hum - 6.83783 * (10 ** -3) * (temp ** 2) - 5.481717 * \
                (10 ** -2) * (hum ** 2) + 1.22874 * (10 ** -3) * (temp ** 2) * \
                hum + 8.5282 * (10 ** -4) * temp * (hum ** 2) - 1.99 * \
-               (10 ** -6) * (temp ** 2) * (hum ** 2);
+               (10 ** -6) * (temp ** 2) * (hum ** 2)
 
 
 def calc_wind_chill(t, windspeed, windspeed10min=None):
@@ -94,8 +105,8 @@ def calc_wind_chill(t, windspeed, windspeed10min=None):
     returns the wind chill in degrees F.
     '''
 
-    w = max(windspeed10min, windspeed)
-    return 35.74 + 0.6215 * t - 35.75 * (w ** 0.16) + 0.4275 * t * (w ** 0.16);
+    w = max(windspeed10min or 0, windspeed)
+    return 35.74 + 0.6215 * t - 35.75 * (w ** 0.16) + 0.4275 * t * (w ** 0.16)
 
 
 def calc_humidity(temp, dewpoint):
@@ -111,7 +122,7 @@ def calc_humidity(temp, dewpoint):
     denom = 112 + (0.9 * t)
 
     rh = math.pow((num / denom), 8)
-    
+
     return rh
 
 
@@ -122,11 +133,11 @@ def calc_dewpoint(temp, hum):
     '''
 
     c = fahrenheit_to_celsius(temp)
-    x = 1 - 0.01 * hum;
+    x = 1 - 0.01 * hum
 
-    dewpoint = (14.55 + 0.114 * c) * x;
-    dewpoint = dewpoint + ((2.5 + 0.007 * c) * x) ** 3;
-    dewpoint = dewpoint + (15.9 + 0.117 * c) * x ** 14;
-    dewpoint = c - dewpoint;
+    dewpoint = (14.55 + 0.114 * c) * x
+    dewpoint = dewpoint + ((2.5 + 0.007 * c) * x) ** 3
+    dewpoint = dewpoint + (15.9 + 0.117 * c) * x ** 14
+    dewpoint = c - dewpoint
 
     return celsius_to_fahrenheit(dewpoint)

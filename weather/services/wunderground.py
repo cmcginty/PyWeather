@@ -45,12 +45,12 @@ Author: Christopher Blunck (chris@wxnet.org)
 Date: 2006-03-27
 '''
 
-from __future__ import absolute_import
 
 import logging
-log = logging.getLogger(__name__)
 
 from . _base import *
+
+log = logging.getLogger(__name__)
 
 
 class Wunderground(HttpPublisher):
@@ -63,11 +63,11 @@ class Wunderground(HttpPublisher):
     URI = "/weatherstation/updateweatherstation.php"
 
     def __init__(self, sid, password, rtfreq=None):
-        super(Wunderground,self).__init__(sid,password)
-        self.args = {   'ID':sid,
-                        'PASSWORD':password,
-                        'action':'updateraw',
-                        'softwaretype':self.SOFTWARE, }
+        super(Wunderground, self).__init__(sid, password)
+        self.args = {'ID': sid,
+                     'PASSWORD': password,
+                     'action': 'updateraw',
+                     'softwaretype': self.SOFTWARE, }
         if rtfreq:
             self.args['realtime'] = 1
             self.args['rtfreq'] = self.rtfreq
@@ -75,8 +75,7 @@ class Wunderground(HttpPublisher):
         else:
             self.server = self.STD_SERVER
 
-
-    def set( self, pressure='NA', dewpoint='NA', humidity='NA', tempf='NA',
+    def set(self, pressure='NA', dewpoint='NA', humidity='NA', tempf='NA',
             rainin='NA', rainday='NA', dateutc='NA', windgust='NA',
             windgustdir='NA', windspeed='NA', winddir='NA',
             clouds='NA', weather='NA', *args, **kw):
@@ -91,29 +90,28 @@ class Wunderground(HttpPublisher):
         #   windspdmph_avg2m, winddir_avg2m, windgustmph_10m, windgusdir_10m
         #   soiltempf, soilmoisture, leafwetness, solarradiation, UV
         #   indoortempf, indoorhumidity
-        self.args.update( {
-                'baromin':pressure,
-                'clouds':clouds,
-                'dailyrainin':rainday,
-                'dateutc':dateutc,
-                'dewptf':dewpoint,
-                'humidity':humidity,
-                'rainin':rainin,
-                'tempf':tempf,
-                'weather':weather,
-                'winddir':winddir,
-                'windgustdir':windgustdir,
-                'windgustmph':windgust,
-                'windspeedmph':windspeed,
-            } )
-        log.debug( self.args )
-
+        self.args.update({
+                'baromin': pressure,
+                'clouds': clouds,
+                'dailyrainin': rainday,
+                'dateutc': dateutc,
+                'dewptf': dewpoint,
+                'humidity': humidity,
+                'rainin': rainin,
+                'tempf': tempf,
+                'weather': weather,
+                'winddir': winddir,
+                'windgustdir': windgustdir,
+                'windgustmph': windgust,
+                'windspeedmph': windspeed,
+            })
+        log.debug(self.args)
 
     def publish(self):
-        http = super( Wunderground, self).publish()
-        if not http[2].find('success') >= 0:
-            raise PublishException('Server returned invalid status: %d %s %s'
-                 % http)
+        http = super(Wunderground, self).publish()
+        if not http[2].find(b'success') >= 0:
+            raise PublishException(
+                'Server returned invalid status: %d %s %s' % http)
         return http
 
 

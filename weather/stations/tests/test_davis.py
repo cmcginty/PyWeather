@@ -1,81 +1,84 @@
-from __future__ import absolute_import
 
+
+import codecs
 import unittest
-from mock import Mock, patch_object
+import mock
 
 from ..davis import VProCRC, VantagePro, LoopStruct
 
-loop_data = "4c4f4f14003e032175da0239d10204056301ffffffffffffffffffff" \
-    "ffffffffff4effffffffffffff0000ffff7f0000ffff000000000000000000000000ffff" \
-    "ffffffffff0000000000000000000000000000000000002703064b26023e070a0d1163"
+loop_data = (
+    b"4c4f4f14003e032175da0239d10204056301ffffffffffffffffffff"
+    b"ffffffffff4effffffffffffff0000ffff7f0000ffff000000000000000000000000ffff"
+    b"ffffffffff0000000000000000000000000000000000002703064b26023e070a0d1163")
+
 
 class TestCRC(unittest.TestCase):
 
     def test_crc(self):
-        raw = loop_data.decode('hex')
-        result = VProCRC.verify( raw )
+        raw = codecs.decode(loop_data, 'hex')
+        result = VProCRC.verify(raw)
         self.assertTrue(result)
 
 
 class TestParse(unittest.TestCase):
-    cmd_mock = Mock()   # for mocking '_cmd' method in 'vp'
-    loop_mock = Mock()  # for mocking '_loop_cmd' method in 'vp'
+    cmd_mock = mock.Mock()   # for mocking '_cmd' method in 'vp'
+    loop_mock = mock.Mock()  # for mocking '_loop_cmd' method in 'vp'
 
     def test_unpack_loop_data(self):
-        LoopStruct.unpack(loop_data.decode('hex'))
+        LoopStruct.unpack(codecs.decode(loop_data, 'hex'))
 
-    @patch_object(VantagePro, '_cmd', cmd_mock )
-    @patch_object(VantagePro, '_loop_cmd', loop_mock )
+    @mock.patch.object(VantagePro, '_cmd', cmd_mock)
+    @mock.patch.object(VantagePro, '_loop_cmd', loop_mock)
     def test_fields(self):
-        self.loop_mock.return_value = loop_data.decode('hex')
+        self.loop_mock.return_value = codecs.decode(loop_data, 'hex')
         vp = VantagePro('/dev/ttyS0')
         fields = vp._get_loop_fields()
 
-        self.assertAlmostEquals( fields['Pressure'], 29.98499999 )
-        self.assertAlmostEquals( fields['TempIn'], 73.0 )
-        self.assertEquals( fields['HumIn'], 57 )
-        self.assertAlmostEquals( fields['TempOut'], 72.09999999999 )
-        self.assertEquals( fields['WindSpeed'], 4 )
-        self.assertEquals( fields['WindSpeed10Min'], 5 )
-        self.assertEquals( fields['WindDir'], 355 )
-        self.assertEquals( fields['HumOut'], 78 )
-        self.assertEquals( fields['RainRate'], 0.0 )
-        self.assertEquals( fields['UV'], 0xFF )
-        self.assertEquals( fields['SolarRad'], 0x7FFF )
-        self.assertEquals( fields['RainStorm'], 0 )
-        self.assertEquals( fields['StormStartDate'], '2127-15-31' )
-        self.assertEquals( fields['RainDay'], 0 )
-        self.assertEquals( fields['RainMonth'], 0 )
-        self.assertEquals( fields['RainYear'], 0 )
-        self.assertEquals( fields['ETDay'], 0 )
-        self.assertEquals( fields['ETMonth'], 0 )
-        self.assertEquals( fields['ETYear'], 0 )
-        self.assertEquals( fields['SoilMoist'], (0xFF,0xFF,0xFF,0xFF) )
-        self.assertEquals( fields['LeafWetness'], (0xFF,0xFF,0xFF,0) )
-        self.assertEquals( fields['BatteryStatus'], 0 )
-        self.assertAlmostEquals( fields['BatteryVolts'], 4.728515625 )
-        self.assertEquals( fields['ForecastIcon'], 6 )
-        self.assertEquals( fields['ForecastRuleNo'], 75 )
-        self.assertEquals( fields['SunRise'], '05:50' )
-        self.assertEquals( fields['SunSet'], '18:54' )
+        self.assertAlmostEqual(fields['Pressure'], 29.98499999)
+        self.assertAlmostEqual(fields['TempIn'], 73.0)
+        self.assertEqual(fields['HumIn'], 57)
+        self.assertAlmostEqual(fields['TempOut'], 72.09999999999)
+        self.assertEqual(fields['WindSpeed'], 4)
+        self.assertEqual(fields['WindSpeed10Min'], 5)
+        self.assertEqual(fields['WindDir'], 355)
+        self.assertEqual(fields['HumOut'], 78)
+        self.assertEqual(fields['RainRate'], 0.0)
+        self.assertEqual(fields['UV'], 0xFF)
+        self.assertEqual(fields['SolarRad'], 0x7FFF)
+        self.assertEqual(fields['RainStorm'], 0)
+        self.assertEqual(fields['StormStartDate'], '2127-15-31')
+        self.assertEqual(fields['RainDay'], 0)
+        self.assertEqual(fields['RainMonth'], 0)
+        self.assertEqual(fields['RainYear'], 0)
+        self.assertEqual(fields['ETDay'], 0)
+        self.assertEqual(fields['ETMonth'], 0)
+        self.assertEqual(fields['ETYear'], 0)
+        self.assertEqual(fields['SoilMoist'], (0xFF, 0xFF, 0xFF, 0xFF))
+        self.assertEqual(fields['LeafWetness'], (0xFF, 0xFF, 0xFF, 0))
+        self.assertEqual(fields['BatteryStatus'], 0)
+        self.assertAlmostEqual(fields['BatteryVolts'], 4.728515625)
+        self.assertEqual(fields['ForecastIcon'], 6)
+        self.assertEqual(fields['ForecastRuleNo'], 75)
+        self.assertEqual(fields['SunRise'], '05:50')
+        self.assertEqual(fields['SunSet'], '18:54')
 
-    @patch_object(VantagePro, '_cmd', cmd_mock )
-    @patch_object(VantagePro, '_loop_cmd', loop_mock )
+    @mock.patch.object(VantagePro, '_cmd', cmd_mock)
+    @mock.patch.object(VantagePro, '_loop_cmd', loop_mock)
     def test_derived_fields(self):
-        self.loop_mock.return_value = loop_data.decode('hex')
+        self.loop_mock.return_value = codecs.decode(loop_data, 'hex')
         vp = VantagePro('/dev/ttyS0')
         fields = vp._get_loop_fields()
         vp._calc_derived_fields(fields)
 
-        self.assertAlmostEquals( fields['HeatIndex'], 72.09999999)
-        self.assertAlmostEquals( fields['WindChill'], 74.17574285)
-        self.assertAlmostEquals( fields['DewPoint'],  64.97343800)
-        self.assertNotEquals( fields['DateStamp'], '' )
-        self.assertTrue( fields['Year'] > 2000 )
-        self.assertTrue( 1 <= int(fields['Month']) <= 12 )
-        self.assertNotEquals( fields['DateStampUtc'], '' )
-        self.assertTrue( fields['YearUtc'] > 2000 )
-        self.assertTrue( 1 <= int(fields['MonthUtc']) <= 12 )
+        self.assertAlmostEqual(fields['HeatIndex'], 72.09999999)
+        self.assertAlmostEqual(fields['WindChill'], 74.17574285)
+        self.assertAlmostEqual(fields['DewPoint'],  64.97343800)
+        self.assertNotEqual(fields['DateStamp'], '')
+        self.assertTrue(fields['Year'] > 2000)
+        self.assertTrue(1 <= int(fields['Month']) <= 12)
+        self.assertNotEqual(fields['DateStampUtc'], '')
+        self.assertTrue(fields['YearUtc'] > 2000)
+        self.assertTrue(1 <= int(fields['MonthUtc']) <= 12)
 
 
 # vim: sts=4:ts=4:sw=4

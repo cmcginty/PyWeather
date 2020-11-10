@@ -134,7 +134,7 @@ def get_pub_services(opts):
    use values in opts data to generate instances of publication services.
    '''
    sites = []
-   for p_key in vars(opts).keys():
+   for p_key in list(vars(opts).keys()):
       args = getattr(opts,p_key)
       if p_key in PUB_SERVICES and args:
          if isinstance(args,tuple):

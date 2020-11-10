@@ -31,65 +31,61 @@ Author: Patrick C. McGinty (pyweather@tuxcoder.com)
 Date: Tuesday, July 13 2010
 '''
 
-from __future__ import absolute_import
-
 import logging
-log = logging.getLogger(__name__)
-
 from . _base import *
+
+log = logging.getLogger(__name__)
 
 
 class PwsWeather(HttpPublisher):
-   '''
-   Publishes weather data to the pwsweather.com servers. See module
-   documentation for additional information and usage idioms.
-   '''
-   STD_SERVER = "www.pwsweather.com"
-   URI = "/pwsupdate/pwsupdate.php"
+    '''
+    Publishes weather data to the pwsweather.com servers. See module
+    documentation for additional information and usage idioms.
+    '''
+    STD_SERVER = "www.pwsweather.com"
+    URI = "/pwsupdate/pwsupdate.php"
 
-   def __init__(self, sid, password):
-      super(PwsWeather,self).__init__(sid,password)
-      self.args = {  'ID':sid,
-                     'PASSWORD':password,
-                     'action':'updateraw',
-                     'softwaretype':self.SOFTWARE, }
-      self.server = self.STD_SERVER
+    def __init__(self, sid, password):
+        super(PwsWeather, self).__init__(sid, password)
+        self.args = {'ID': sid,
+                     'PASSWORD': password,
+                     'action': 'updateraw',
+                     'softwaretype': self.SOFTWARE}
+        self.server = self.STD_SERVER
 
+    def set(self, pressure='NA', dewpoint='NA', humidity='NA', tempf='NA',
+            rainin='NA', rainday='NA', rainmonth='NA', rainyear='NA',
+            dateutc='NA', windgust='NA', windspeed='NA', winddir='NA',
+            weather='NA', *args, **kw):
+        '''
+        Define weatehr data published to the server.
 
-   def set( self, pressure='NA', dewpoint='NA', humidity='NA', tempf='NA',
-         rainin='NA', rainday='NA', rainmonth='NA', rainyear='NA',
-         dateutc='NA', windgust='NA', windspeed='NA', winddir='NA',
-         weather='NA', *args, **kw):
-      '''
-      Useful for defining weather data published to the server. Parameters not
-      sent will be cleared and not set to server. Unknown keyword args will be
-      silently ignored, so be careful. This is necessary for publishers that
-      support more fields than others.
-      '''
-      # unused, but valid, parameters are:
-      #   solarradiation, UV
-      self.args.update( {
-            'baromin':pressure,
-            'dailyrainin':rainday,
-            'dateutc':dateutc,
-            'dewptf':dewpoint,
-            'humidity':humidity,
-            'monthrainin':rainmonth,
-            'rainin':rainin,
-            'tempf':tempf,
-            'weather':weather,
-            'winddir':winddir,
-            'windgustmph':windgust,
-            'windspeedmph':windspeed,
-            'yearrainin':rainyear,
-          } )
-      log.debug( self.args )
+        Parameters not sent will be cleared and not set to server. Unknown
+        keyword args will be silently ignored, so be careful. This is necessary
+        for publishers that support more fields than others.
+        '''
+        # unused, but valid, parameters are:
+        #   solarradiation, UV
+        self.args.update({
+            'baromin': pressure,
+            'dailyrainin': rainday,
+            'dateutc': dateutc,
+            'dewptf': dewpoint,
+            'humidity': humidity,
+            'monthrainin': rainmonth,
+            'rainin': rainin,
+            'tempf': tempf,
+            'weather': weather,
+            'winddir': winddir,
+            'windgustmph': windgust,
+            'windspeedmph': windspeed,
+            'yearrainin': rainyear,
+          })
+        log.debug(self.args)
 
-
-   def publish(self):
-      http = super(PwsWeather,self).publish()
-      if not http[2].find('Logged and posted') >= 0:
-         raise PublishException('Server returned invalid status: %d %s %s'
-              % http)
-      return http
-
+    def publish(self):
+        http = super(PwsWeather, self).publish()
+        if not http[2].find(b'Logged and posted') >= 0:
+            raise PublishException(
+                'Server returned invalid status: %d %s %s' % http)
+        return http

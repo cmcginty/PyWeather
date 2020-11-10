@@ -4,13 +4,15 @@ upload of weather data (e.g. wunderground.com), and meteorological
 calculation/conversion functions.
 '''
 
-__version__ = '0.9.1'
+__version__ = '0.10.0'
 
 import logging
+
 
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
+
 # init a null handler, to prevent warnings
-logging.getLogger(__name__).addHandler( NullHandler() )
+logging.getLogger(__name__).addHandler(NullHandler())
