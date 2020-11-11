@@ -21,9 +21,9 @@ Date: 2006-03-27
 '''
 
 
-
 from ._struct import Struct
 from ..units import *
+from .station import *
 
 import logging
 import serial
@@ -292,6 +292,25 @@ ArchiveAStruct = _ArchiveAStruct()
 ArchiveBStruct = _ArchiveBStruct()
 
 
+def _fields_to_weather_point(fields: dict) -> WeatherPoint:
+    '''Convert VantagePro fields dicrtionary to WeatherPoint.
+
+    Only supports limitted subset of data available in self.fields -
+    generally only those useful for posting to weather services.
+    '''
+    return WeatherPoint(
+        temperature_f=fields['TempOut'],
+        pressure=fields['Pressure'],
+        dew_point_f=fields['DewPoint'],
+        humidity=fields['HumOut'],
+        rain_rate=fields['RainRate'],
+        rain_day=fields['RainDay'],
+        time=dt.datetime.strptime(fields['DateStampUtc'], "%Y-%m-%d %H:%M:%S"),
+        wind_speed_mph=fields['WindSpeed10Min'],
+        wind_direction=fields['WindDir'],
+    )
+
+
 ##############################################################################
 # |--------------------------------------------------------------------------|#
 # |--------------------------------------------------------------------------|#
@@ -300,7 +319,7 @@ ArchiveBStruct = _ArchiveBStruct()
 # |--------------------------------------------------------------------------|#
 ##############################################################################
 
-class VantagePro(object):
+class VantagePro(Station):
     '''
     A class capable of reading raw (binary) weather data from a
     vantage pro console and parsing it into usable scalar
@@ -560,5 +579,12 @@ class VantagePro(object):
 
         # set the fields variable the the values in the dict
         self.fields = fields
+
+
+    def get_reading() -> WeatherPoint:
+        '''Return a single weather reading.'''
+        self.parse()
+
+        return self._fields_to_weather_point()
 
 # vim: sts=4:ts=4:sw=4
