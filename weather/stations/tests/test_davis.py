@@ -74,7 +74,7 @@ class TestParse(unittest.TestCase):
 
         self.assertAlmostEqual(fields['HeatIndex'], 72.09999999)
         self.assertAlmostEqual(fields['WindChill'], 74.17574285)
-        self.assertAlmostEqual(fields['DewPoint'],  64.97343800)
+        self.assertAlmostEqual(fields['DewPoint'], 64.97343800)
         self.assertNotEqual(fields['DateStamp'], '')
         self.assertTrue(fields['Year'] > 2000)
         self.assertTrue(1 <= int(fields['Month']) <= 12)
@@ -103,8 +103,8 @@ class TestFieldsToWeatherPoint(unittest.TestCase):
             humidity=56,
             dew_point_f=80,
             pressure=29.9,
-            rain_rate=0.1,
-            rain_day=0.2,
+            rain_rate_in=0.1,
+            rain_day_in=0.2,
             wind_speed_mph=5,
             wind_direction=15
         )
