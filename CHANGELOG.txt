@@ -1,6 +1,16 @@
 .. PyWeather // (c) 2010, Patrick C. McGinty
    pyweather[@]tuxcoder[dot]com
-   
+
+v0.11.0
+======
+:Release Date: 2021-04-03
+* Added support of the Netatmo Weather Station.
+* Major update of weatherpub script:
+* Supports Netatmo weather station in addition to Vantage Pro.
+* Supports reading settings from the configuration file.
+* The major update attempts to be backwards-compatible, although it is very
+  likely something is still broken.
+
 v0.10.0
 ======
 :Release Date: 2020-11-09
