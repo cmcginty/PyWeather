@@ -45,35 +45,37 @@ class NoSensorException(Exception):
 
 
 class WindGust(object):
-   NO_VALUE = ('NA','NA')
+    NO_VALUE = ('NA', 'NA')
 
-   def __init__(self):
-      self.value = self.NO_VALUE
-      self.count = 0
+    def __init__(self):
+        self.value = self.NO_VALUE
+        self.count = 0
 
-   def get( self, station, interval ):
-      '''
-      return gust data, if above threshold value and current time is inside
-      reporting window period
-      '''
-      rec = station.fields['Archive']
-      # process new data
-      if rec:
-         threshold = station.fields['WindSpeed10Min'] + GUST_MPH_MIN
-         if rec['WindHi'] >= threshold:
-            self.value = (rec['WindHi'],rec['WindHiDir'])
-            self.count = GUST_TTL * 60 / interval
-         else:
+    def get(self, station, interval):
+        '''
+        return gust data, if above threshold value and current time is inside
+        reporting window period
+        '''
+        rec = station.fields['Archive']
+        # process new data
+        if rec:
+            threshold = station.fields['WindSpeed10Min'] + GUST_MPH_MIN
+            if rec['WindHi'] >= threshold:
+                self.value = (rec['WindHi'], rec['WindHiDir'])
+                self.count = GUST_TTL * 60 / interval
+            else:
+                self.value = self.NO_VALUE
+
+        # return gust value, if remaining time is left, and valid
+        if self.count:
+            self.count -= 1
+        else:
             self.value = self.NO_VALUE
 
-      # return gust value, if remaining time is left, and valid
-      if self.count:
-         self.count -= 1
-      else:
-         self.value = self.NO_VALUE
+        log.debug('wind gust of {0} mph from {1}'.format(*self.value))
+        return self.value
 
-      log.debug('wind gust of {0} mph from {1}'.format(*self.value))
-      return self.value
+
 WindGust = WindGust()
 
 
