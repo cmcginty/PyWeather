@@ -22,8 +22,9 @@ PyWeather also contains modules that are capable of downloading
 observations from weather consoles.  The current list of supported
 weather consoles includes:
 
-- Davis Vantage Pro
-- Davis Vantage Pro2
+-   Davis Vantage Pro
+-   Davis Vantage Pro2
+-   Netatmo weather station.
 
 
 ## Data Publication
@@ -31,9 +32,9 @@ weather consoles includes:
 PyWeather contains a module that allows developers to post conditions
 to weather aggregation sites. The current list of support services includes:
 
-- WeatherUnderground (wundgerground.com)
-- PWS Weather        (pwsweather.com)
-- WeatherForYou      (weatherforyou.com)
+-   WeatherUnderground (wundgerground.com)
+-   PWS Weather        (pwsweather.com)
+-   WeatherForYou      (weatherforyou.com)
 
 
 For additional information, please email the maintainer:
