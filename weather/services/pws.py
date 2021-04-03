@@ -45,9 +45,10 @@ class PwsWeather(HttpPublisher):
     STD_SERVER = "www.pwsweather.com"
     URI = "/pwsupdate/pwsupdate.php"
 
-    def __init__(self, sid, password):
+    def __init__(self, sid: str = None, password: str = None,
+                 site_id: str = None):
         super(PwsWeather, self).__init__(sid, password)
-        self.args = {'ID': sid,
+        self.args = {'ID': sid or site_id,
                      'PASSWORD': password,
                      'action': 'updateraw',
                      'softwaretype': self.SOFTWARE}
@@ -79,8 +80,7 @@ class PwsWeather(HttpPublisher):
             'winddir': winddir,
             'windgustmph': windgust,
             'windspeedmph': windspeed,
-            'yearrainin': rainyear,
-          })
+            'yearrainin': rainyear})
         log.debug(self.args)
 
     def publish(self):
