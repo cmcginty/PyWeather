@@ -35,16 +35,16 @@ class HttpPublisher(object):
 
     @staticmethod
     def _publish(args, server, uri):
-        from http.client import HTTPConnection
+        from http.client import HTTPConnection, HTTPSConnection
         from urllib.parse import urlencode
 
-        args = dict((k, v) for k, v in list(args.items()) if v != 'NA')
+        args = {k: v for k, v in args.items() if v is not None and v != 'NA'}
         uri = uri + "?" + urlencode(args)
 
-        log.debug('Connect to: http://%s' % server)
+        log.debug('Connect to: https://%s' % server)
         log.debug('GET %s' % uri)
 
-        conn = HTTPConnection(server, timeout=5)
+        conn = HTTPSConnection(server, timeout=5)
         if not conn:
             raise PublishException('Remote server connection timeout')
         conn.request("GET", uri)

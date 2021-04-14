@@ -1,10 +1,12 @@
 
 
 import codecs
-import unittest
+import datetime
 import mock
+import unittest
 
-from ..davis import VProCRC, VantagePro, LoopStruct
+from ..davis import VProCRC, VantagePro, LoopStruct, _fields_to_weather_point
+from ..station import WeatherPoint
 
 loop_data = (
     b"4c4f4f14003e032175da0239d10204056301ffffffffffffffffffff"
@@ -72,13 +74,41 @@ class TestParse(unittest.TestCase):
 
         self.assertAlmostEqual(fields['HeatIndex'], 72.09999999)
         self.assertAlmostEqual(fields['WindChill'], 74.17574285)
-        self.assertAlmostEqual(fields['DewPoint'],  64.97343800)
+        self.assertAlmostEqual(fields['DewPoint'], 64.97343800)
         self.assertNotEqual(fields['DateStamp'], '')
         self.assertTrue(fields['Year'] > 2000)
         self.assertTrue(1 <= int(fields['Month']) <= 12)
         self.assertNotEqual(fields['DateStampUtc'], '')
         self.assertTrue(fields['YearUtc'] > 2000)
         self.assertTrue(1 <= int(fields['MonthUtc']) <= 12)
+
+
+class TestFieldsToWeatherPoint(unittest.TestCase):
+
+    def test_fields_to_weather_point(self):
+        fields = {
+            'TempOut': 87,
+            'Pressure': 29.9,
+            'DewPoint': 80,
+            'HumOut': 56,
+            'RainRate': 0.1,
+            'RainDay': 0.2,
+            'DateStampUtc': '2020-01-02 03:04:05',
+            'WindSpeed10Min': 5,
+            'WindDir': 15
+        }
+        expected = WeatherPoint(
+            time=datetime.datetime(2020, 1, 2, 3, 4, 5),
+            temperature_f=87,
+            humidity=56,
+            dew_point_f=80,
+            pressure=29.9,
+            rain_rate_in=0.1,
+            rain_day_in=0.2,
+            wind_speed_mph=5,
+            wind_direction=15
+        )
+        self.assertEqual(_fields_to_weather_point(fields), expected)
 
 
 # vim: sts=4:ts=4:sw=4

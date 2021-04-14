@@ -4,7 +4,7 @@ upload of weather data (e.g. wunderground.com), and meteorological
 calculation/conversion functions.
 '''
 
-__version__ = '0.10.0'
+__version__ = '0.11.0'
 
 import logging
 

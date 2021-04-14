@@ -35,10 +35,10 @@ setup(name=name,
       download_url="https://github.com/cmcginty/PyWeather/archive/%s.zip" %
       pkg.__version__,
       packages=[
-         name,
-         name+'.services',
-         name+'.stations',
-         name+'.units',
+          name,
+          name + '.services',
+          name + '.stations',
+          name + '.units',
       ],
       scripts=['scripts/weatherpub.py'],
       )

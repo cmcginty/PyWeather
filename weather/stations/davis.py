@@ -21,9 +21,9 @@ Date: 2006-03-27
 '''
 
 
-
 from ._struct import Struct
 from ..units import *
+from .station import *
 
 import logging
 import serial
@@ -45,7 +45,8 @@ def log_raw(msg, raw):
     log.debug(msg + ': ' + raw.encode('hex'))
 
 
-class NoDeviceException(Exception): pass
+class NoDeviceException(Exception):
+    pass
 
 
 class VProCRC(object):
@@ -292,6 +293,25 @@ ArchiveAStruct = _ArchiveAStruct()
 ArchiveBStruct = _ArchiveBStruct()
 
 
+def _fields_to_weather_point(fields: dict) -> WeatherPoint:
+    '''Convert VantagePro fields dicrtionary to WeatherPoint.
+
+    Only supports limitted subset of data available in self.fields -
+    generally only those useful for posting to weather services.
+    '''
+    return WeatherPoint(
+        temperature_f=fields['TempOut'],
+        pressure=fields['Pressure'],
+        dew_point_f=fields['DewPoint'],
+        humidity=fields['HumOut'],
+        rain_rate_in=fields['RainRate'],
+        rain_day_in=fields['RainDay'],
+        time=dt.datetime.strptime(fields['DateStampUtc'], "%Y-%m-%d %H:%M:%S"),
+        wind_speed_mph=fields['WindSpeed10Min'],
+        wind_direction=fields['WindDir'],
+    )
+
+
 ##############################################################################
 # |--------------------------------------------------------------------------|#
 # |--------------------------------------------------------------------------|#
@@ -300,7 +320,7 @@ ArchiveBStruct = _ArchiveBStruct()
 # |--------------------------------------------------------------------------|#
 ##############################################################################
 
-class VantagePro(object):
+class VantagePro(Station):
     '''
     A class capable of reading raw (binary) weather data from a
     vantage pro console and parsing it into usable scalar
@@ -325,15 +345,18 @@ class VantagePro(object):
         Initialize the serial connection with the console.
         :param device: /dev/yourConsoleDevice
         :param log_interval: default 5
-        :param logStartDate: the datetime.datetime object representing the starting log date. Default None aka "all"
-        :param clear: boolean, if true clean all the log in the console. Default False
+        :param logStartDate: the datetime.datetime object representing the
+            starting log date. Default None aka "all"
+        :param clear: boolean, if true clean all the log in the console.
+            Default False.
         '''
         self.port = serial.Serial(device, BAUD, timeout=READ_DELAY)
         # set the logging interval to be downloaded. Default all
         if logStartDate is None:
             self._archive_time = (0, 0)
         else:
-            self._archive_time = (self.calcDateStamp(logStartDate), self.calcTimeStamp(logStartDate))
+            self._archive_time = (self.calcDateStamp(logStartDate),
+                                  self.calcTimeStamp(logStartDate))
         # Clear the whole archive if necessary. Default: no
         if clear:
             self._cmd('CLRLOG')  # prevent getting a full log dump at startup
@@ -341,7 +364,9 @@ class VantagePro(object):
 
     def calcDateStamp(self, date):
         '''
-        As stated into the Vantage Serial Protocol manual, this method converts a datetime object into the right DateStamp
+        As stated into the Vantage Serial Protocol manual, this method converts
+        a datetime object into the right DateStamp
+
         :param date: the datetime object to convert
         :return: the dateStamp integer
         '''
@@ -349,7 +374,9 @@ class VantagePro(object):
 
     def calcTimeStamp(self, date):
         '''
-        As stated into the Vantage Serial Protocol manual, this method converts a datetime object into the right TimeStamp
+        As stated into the Vantage Serial Protocol manual, this method converts
+        a datetime object into the right TimeStamp.
+
         :param date: the datetime object to convert
         :return: the timeStamp integer
         '''
@@ -445,7 +472,8 @@ class VantagePro(object):
         self.port.write(tbuf + crc)  # send time stamp + crc
         ack = self.port.read(len(self.ACK))  # read ACK
         log_raw('read', ack)
-        if ack != self.ACK: return  # if bad ack, return
+        if ack != self.ACK:
+            return  # if bad ack, return
 
         # 3. read pre-amble data
         raw = self.port.read(DmpStruct.size)
@@ -495,7 +523,8 @@ class VantagePro(object):
         for i in range(3):
             raw = self._loop_cmd()  # read raw data
             crc_ok = VProCRC.verify(raw)
-            if crc_ok: break  # exit loop if valid
+            if crc_ok:
+                break  # exit loop if valid
             time.sleep(1)
 
         if not crc_ok:
@@ -510,7 +539,8 @@ class VantagePro(object):
         '''
         for i in range(3):
             records = self._dmpaft_cmd(self._archive_time)
-            if records is not None: break
+            if records is not None:
+                break
             time.sleep(1)
 
         if records is None:
@@ -560,5 +590,11 @@ class VantagePro(object):
 
         # set the fields variable the the values in the dict
         self.fields = fields
+
+    def get_reading(self) -> WeatherPoint:
+        '''Return a single weather reading.'''
+        self.parse()
+
+        return self._fields_to_weather_point()
 
 # vim: sts=4:ts=4:sw=4

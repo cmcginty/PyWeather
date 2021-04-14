@@ -1,0 +1,23 @@
+[general]
+# Weather station name. Currently supported: vantage_pro, netatmo.
+station=netatmo
+# Publication websites, comma-separated.
+# Currently supported: 'wug', 'pwsweather', 'file'
+publication=pwsweather
+
+##
+# Netatmo weather station settings
+[netatmo]
+
+client_id="<your client_id>"
+client_secret="<your client_secret>"
+username="<netatmo username>"
+password="<netatmo user password>"
+module_name=Outdoor
+
+##
+# pwsweather.com settings
+[pwsweather]
+
+site_id=MySiteID
+password=MyPassowrd
