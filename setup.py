@@ -41,4 +41,8 @@ setup(name=name,
           name + '.units',
       ],
       scripts=['scripts/weatherpub.py'],
+      install_requires=[
+          'serial>=0.0.97',
+          'mock>=4.0.3'
+      ]
       )
