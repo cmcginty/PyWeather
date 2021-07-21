@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
@@ -18,7 +18,7 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        python3 -m pip install .
+        pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         python3 setup.py build_ext --inplace
     - name: Test with pytest
