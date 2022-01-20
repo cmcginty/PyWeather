@@ -40,5 +40,8 @@ setup(name=name,
           name + '.stations',
           name + '.units',
       ],
+      install_requires=[
+        'pyserial==3.5'
+      ],
       scripts=['scripts/weatherpub.py'],
       )
