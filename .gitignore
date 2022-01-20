@@ -1,4 +1,5 @@
 *.pyc
 /build
-./.idea
+.idea/
 scripts/weatherpub.conf
+weather.egg-info/
