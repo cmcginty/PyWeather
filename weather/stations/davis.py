@@ -42,7 +42,7 @@ BAUD = 19200
 
 
 def log_raw(msg, raw):
-    log.debug(msg + ': ' + raw.encode('hex'))
+    log.debug(msg + ': ' + raw.decode())
 
 
 class NoDeviceException(Exception):
@@ -411,15 +411,24 @@ class VantagePro(Station):
         issue wakeup command to device to take out of standby mode.
         '''
         log.info("send: WAKEUP")
-        for i in range(3):
-            self.port.write('\n')  # wakeup device
-            ack = self.port.read(len(self.WAKE_ACK))  # read wakeup string
-            log_raw('read', ack)
-            if ack == self.WAKE_ACK:
-                return
-        raise NoDeviceException('Can not access weather station')
 
-    def _cmd(self, cmd, *args, **kw):
+        awake, i = False, 0
+        while not awake and i < 3:
+            self.port.write("\n".encode())
+            ack = self.port.read(len(self.WAKE_ACK))
+            if ack.decode() == self.WAKE_ACK:
+                awake = True
+            else:
+                time.sleep(1.2)
+                i += 1
+        return None
+
+        try:
+            assert awake is True
+        except:
+            raise NoDeviceException('Can not access weather station')
+
+    def _cmd(self, cmd, *args, **kw) -> None:
         '''
         write a single command, with variable number of arguments. after the
         command, the device must return ACK
@@ -431,7 +440,7 @@ class VantagePro(Station):
             cmd = "%s %s" % (cmd, ' '.join(str(a) for a in args))
         for i in range(3):
             log.info("send: " + cmd)
-            self.port.write(cmd + '\n')
+            self.port.write(f"{cmd} \n".encode())
             if ok:
                 ack = self.port.read(len(self.OK))  # read OK
                 log_raw('read', ack)
@@ -440,9 +449,9 @@ class VantagePro(Station):
             else:
                 ack = self.port.read(len(self.ACK))  # read ACK
                 log_raw('read', ack)
-                if ack == self.ACK:
+                if ack.decode() == self.ACK:
                     return
-        raise NoDeviceException('Can not access weather station')
+        # raise NoDeviceException('Can not access weather station')
 
     def _loop_cmd(self):
         '''
