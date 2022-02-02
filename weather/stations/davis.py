@@ -20,7 +20,6 @@ Original Author: Christopher Blunck (chris@wxnet.org)
 Date: 2006-03-27
 '''
 
-
 from ._struct import Struct
 from ..units import *
 from .station import *
@@ -421,12 +420,13 @@ class VantagePro(Station):
             else:
                 time.sleep(1.2)
                 i += 1
-        return None
 
         try:
             assert awake is True
-        except:
+        except AssertionError:
             raise NoDeviceException('Can not access weather station')
+
+        return None
 
     def _cmd(self, cmd, *args, **kw) -> None:
         '''
