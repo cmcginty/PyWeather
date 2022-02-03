@@ -1,4 +1,4 @@
-'''
+"""
 Davis Vantage Pro and Pro2 Service
 
 Abstract:
@@ -6,8 +6,8 @@ Allows data query of Davis Vantage Pro and Pro2 devices via serial port
 interface.  The primary implemented serial commands supported are LOOP and
 DMPAFT.
 
-The LOOP command can aquire all real-time data points. The DMPAFT command is
-used to aquire periodic high/low data.
+The LOOP command can acquire all real-time data points. The DMPAFT command is
+used to acquire periodic high/low data.
 
 All data is returned in a dict structure with value/key pairs. Periodic data is
 only captured once per period. When not active, the keys for periodic data are
@@ -18,7 +18,7 @@ Date: 2010-06-025
 
 Original Author: Christopher Blunck (chris@wxnet.org)
 Date: 2006-03-27
-'''
+"""
 
 from ._struct import Struct
 from ..units import *
@@ -49,10 +49,10 @@ class NoDeviceException(Exception):
 
 
 class VProCRC(object):
-    '''
+    """
     Implements CRC algorithm, necessary for encoding and verifying data from
     the Davis Vantage Pro unit.
-    '''
+    """
 
     CRC_TABLE = (
         0x0, 0x1021, 0x2042, 0x3063, 0x4084, 0x50a5, 0x60c6, 0x70e7,
@@ -91,9 +91,9 @@ class VProCRC(object):
 
     @staticmethod
     def get(data):
-        '''
+        """
         return CRC calc value from raw serial data
-        '''
+        """
         crc = 0
         for byte in array('B', data):
             crc = (VProCRC.CRC_TABLE[(crc >> 8) ^ byte] ^ ((crc & 0xFF) << 8))
@@ -101,10 +101,10 @@ class VProCRC(object):
 
     @staticmethod
     def verify(data):
-        '''
+        """
         perform CRC check on raw serial data, return true if valid.
         a valid CRC == 0.
-        '''
+        """
         if len(data) == 0:
             return False
         crc = VProCRC.get(data)
@@ -118,11 +118,11 @@ class VProCRC(object):
 # --------------------------------------------------------------------------- #
 
 class LoopStruct(Struct):
-    '''
+    """
     For unpacking data structure returned by the 'LOOP' command. this structure
     contains all of the real-time data that can be read from the Davis Vantage
     Pro.
-    '''
+    """
     FMT = (
         ('LOO', '3s'), ('BarTrend', 'B'), ('PacketType', 'B'),
         ('NextRec', 'H'), ('Pressure', 'H'), ('TempIn', 'H'),
@@ -171,17 +171,17 @@ class LoopStruct(Struct):
 
     @staticmethod
     def _unpack_time(val):
-        '''
+        """
         given a packed time field, unpack and return "HH:MM" string.
-        '''
+        """
         # format: HHMM, and space padded on the left.ex: "601" is 6:01 AM
         return "%02d:%02d" % divmod(val, 100)  # covert to "06:01"
 
     @staticmethod
     def _unpack_storm_date(date):
-        '''
+        """
         given a packed storm date field, unpack and return 'YYYY-MM-DD' string.
-        '''
+        """
         year = (date & 0x7f) + 2000  # 7 bits
         day = (date >> 7) & 0x01f  # 5 bits
         month = (date >> 12) & 0x0f  # 4 bits
@@ -191,9 +191,9 @@ class LoopStruct(Struct):
 # --------------------------------------------------------------------------- #
 
 class _ArchiveStruct(object):
-    '''
+    """
     common features for both Rev.A and Rev.B structures.
-    '''
+    """
 
     def __init__(self):
         super(_ArchiveStruct, self).__init__(self.FMT, '=')
@@ -293,11 +293,11 @@ ArchiveBStruct = _ArchiveBStruct()
 
 
 def _fields_to_weather_point(fields: dict) -> WeatherPoint:
-    '''Convert VantagePro fields dicrtionary to WeatherPoint.
+    """Convert VantagePro fields dictionary to WeatherPoint.
 
-    Only supports limitted subset of data available in self.fields -
+    Only supports limited subset of data available in self.fields -
     generally only those useful for posting to weather services.
-    '''
+    """
     return WeatherPoint(
         temperature_f=fields['TempOut'],
         pressure=fields['Pressure'],
@@ -320,7 +320,7 @@ def _fields_to_weather_point(fields: dict) -> WeatherPoint:
 ##############################################################################
 
 class VantagePro(Station):
-    '''
+    """
     A class capable of reading raw (binary) weather data from a
     vantage pro console and parsing it into usable scalar
     (integer/long/real) values.
@@ -328,7 +328,7 @@ class VantagePro(Station):
     The data read from the console is in binary format. The data is in
     least-ordered nybble strategy, and must be read with correct sizes and
     offsets for proper byte ordering.
-    '''
+    """
 
     # device reply commands
     WAKE_ACK = '\n\r'
@@ -340,7 +340,7 @@ class VantagePro(Station):
     _ARCHIVE_REV_B = None
 
     def __init__(self, device, log_interval=5, logStartDate=None, clear=False):
-        '''
+        """
         Initialize the serial connection with the console.
         :param device: /dev/yourConsoleDevice
         :param log_interval: default 5
@@ -348,7 +348,7 @@ class VantagePro(Station):
             starting log date. Default None aka "all"
         :param clear: boolean, if true clean all the log in the console.
             Default False.
-        '''
+        """
         self.port = serial.Serial(device, BAUD, timeout=READ_DELAY)
         # set the logging interval to be downloaded. Default all
         if logStartDate is None:
@@ -362,35 +362,35 @@ class VantagePro(Station):
         self._cmd('SETPER', log_interval, ok=True)
 
     def calcDateStamp(self, date):
-        '''
+        """
         As stated into the Vantage Serial Protocol manual, this method converts
         a datetime object into the right DateStamp
 
         :param date: the datetime object to convert
         :return: the dateStamp integer
-        '''
+        """
         return date.day + date.month * 32 + (date.year - 2000) * 512
 
     def calcTimeStamp(self, date):
-        '''
+        """
         As stated into the Vantage Serial Protocol manual, this method converts
         a datetime object into the right TimeStamp.
 
         :param date: the datetime object to convert
         :return: the timeStamp integer
-        '''
+        """
         return 100 * date.hour + date.minute
 
     def __del__(self):
-        '''
+        """
         close serial port when object is deleted.
-        '''
+        """
         self.port.close()
 
     def _use_rev_b_archive(self, records, offset):
-        '''
+        """
         return True if weather station returns Rev.B archives
-        '''
+        """
         # if pre-determined, return result
         if type(self._ARCHIVE_REV_B) is bool:
             return self._ARCHIVE_REV_B
@@ -406,9 +406,9 @@ class VantagePro(Station):
         return self._ARCHIVE_REV_B
 
     def _wakeup(self):
-        '''
+        """
         issue wakeup command to device to take out of standby mode.
-        '''
+        """
         log.info("send: WAKEUP")
 
         awake, i = False, 0
@@ -429,10 +429,10 @@ class VantagePro(Station):
         return None
 
     def _cmd(self, cmd, *args, **kw) -> None:
-        '''
+        """
         write a single command, with variable number of arguments. after the
         command, the device must return ACK
-        '''
+        """
         ok = kw.setdefault('ok', False)
 
         self._wakeup()
@@ -454,19 +454,19 @@ class VantagePro(Station):
         # raise NoDeviceException('Can not access weather station')
 
     def _loop_cmd(self):
-        '''
+        """
         reads a raw string containing data read from the device
         provided (in /dev/XXX) format. all reads are non-blocking.
-        '''
+        """
         self._cmd('LOOP', 1)
         raw = self.port.read(LoopStruct.size)  # read data
         # log_raw('read', raw)
         return raw
 
     def _dmpaft_cmd(self, time_fields):
-        '''
+        """
         issue a command to read the archive records after a known time stamp.
-        '''
+        """
         records = []
         # convert time stamp fields to buffer
         tbuf = struct.pack('2H', *time_fields)
@@ -542,10 +542,10 @@ class VantagePro(Station):
         return LoopStruct.unpack(raw)
 
     def _get_new_archive_fields(self):
-        '''
+        """
         returns a dictionary of fields from the newest archive record in the
         device. return None when no records are new.
-        '''
+        """
         for i in range(3):
             records = self._dmpaft_cmd(self._archive_time)
             if records is not None:
@@ -566,9 +566,9 @@ class VantagePro(Station):
         return new_rec
 
     def _calc_derived_fields(self, fields):
-        '''
+        """
         calculates the derived fields (those fields that are calculated)
-        '''
+        """
         # convenience variables for the calculations below
         temp = fields['TempOut']
         hum = fields['HumOut']
@@ -588,10 +588,10 @@ class VantagePro(Station):
         fields['MonthUtc'] = str(now[1]).zfill(2)
 
     def parse(self):
-        '''
+        """
         read and parse a set of data read from the console.  after the
         data is parsed it is available in the fields variable.
-        '''
+        """
         fields = self._get_loop_fields()
         fields['Archive'] = self._get_new_archive_fields()
 
@@ -601,7 +601,7 @@ class VantagePro(Station):
         self.fields = fields
 
     def get_reading(self) -> WeatherPoint:
-        '''Return a single weather reading.'''
+        """Return a single weather reading."""
         self.parse()
 
         return self._fields_to_weather_point()
