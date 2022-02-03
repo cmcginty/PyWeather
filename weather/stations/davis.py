@@ -443,12 +443,12 @@ class VantagePro(Station):
             self.port.write(f"{cmd} \n".encode())
             if ok:
                 ack = self.port.read(len(self.OK))  # read OK
-                log_raw('read', ack)
+                # log_raw('read', ack)
                 if ack == self.OK:
                     return
             else:
                 ack = self.port.read(len(self.ACK))  # read ACK
-                log_raw('read', ack)
+                # log_raw('read', ack)
                 if ack.decode() == self.ACK:
                     return
         # raise NoDeviceException('Can not access weather station')
@@ -460,7 +460,7 @@ class VantagePro(Station):
         '''
         self._cmd('LOOP', 1)
         raw = self.port.read(LoopStruct.size)  # read data
-        log_raw('read', raw)
+        # log_raw('read', raw)
         return raw
 
     def _dmpaft_cmd(self, time_fields):
@@ -477,22 +477,22 @@ class VantagePro(Station):
         # 2. send time stamp + crc
         crc = VProCRC.get(tbuf)
         crc = struct.pack('>H', crc)  # crc in big-endian format
-        log_raw('send', tbuf + crc)
+        # log_raw('send', tbuf + crc)
         self.port.write(tbuf + crc)  # send time stamp + crc
         ack = self.port.read(len(self.ACK))  # read ACK
-        log_raw('read', ack)
-        if ack != self.ACK:
-            return  # if bad ack, return
+        # log_raw('read', ack)
+        if ack.decode() != self.ACK:
+            return None  # if bad ack, return None
 
         # 3. read pre-amble data
         raw = self.port.read(DmpStruct.size)
-        log_raw('read', raw)
+        # log_raw('read', raw)
         if not VProCRC.verify(raw):  # check CRC value
-            log_raw('send ESC', self.ESC)
+            # log_raw('send ESC', self.ESC)
             self.port.write(self.ESC)  # if bad, escape and abort
             return
-        log_raw('send ACK', self.ACK)
-        self.port.write(self.ACK)  # send ACK
+        # log_raw('send ACK', self.ACK)
+        self.port.write(self.ACK.encode())  # send ACK
 
         # 4. loop through all page records
         dmp = DmpStruct.unpack(raw)
@@ -501,13 +501,13 @@ class VantagePro(Station):
         for i in range(dmp['Pages']):
             # 5. read page data
             raw = self.port.read(DmpPageStruct.size)
-            log_raw('read', raw)
+            # log_raw('read', raw)
             if not VProCRC.verify(raw):  # check CRC value
-                log_raw('send ESC', self.ESC)
+                # log_raw('send ESC', self.ESC)
                 self.port.write(self.ESC)  # if bad, escape and abort
                 return
-            log_raw('send ACK', self.ACK)
-            self.port.write(self.ACK)  # send ACK
+            # log_raw('send ACK', self.ACK)
+            self.port.write(self.ACK.encode())  # send ACK
 
             # 6. loop through archive records
             page = DmpPageStruct.unpack(raw)
