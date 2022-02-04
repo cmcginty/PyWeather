@@ -33,7 +33,8 @@ class TestParse(unittest.TestCase):
     @mock.patch.object(VantagePro, '_loop_cmd', loop_mock)
     def test_fields(self):
         self.loop_mock.return_value = codecs.decode(loop_data, 'hex')
-        vp = VantagePro('/dev/ttyS0')
+        # TODO: this is working just if there is an actual weather station attached.
+        vp = VantagePro('/dev/ttyUSB0')
         fields = vp._get_loop_fields()
 
         self.assertAlmostEqual(fields['Pressure'], 29.98499999)
@@ -68,7 +69,8 @@ class TestParse(unittest.TestCase):
     @mock.patch.object(VantagePro, '_loop_cmd', loop_mock)
     def test_derived_fields(self):
         self.loop_mock.return_value = codecs.decode(loop_data, 'hex')
-        vp = VantagePro('/dev/ttyS0')
+        # TODO same as todo above!
+        vp = VantagePro('/dev/ttyUSB0')
         fields = vp._get_loop_fields()
         vp._calc_derived_fields(fields)
 

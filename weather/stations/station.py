@@ -34,7 +34,7 @@ class WeatherPoint:
             temperature_f: float = None,
             humidity: int = None,
             dew_point_f: float = None,
-            pressure: int = None,
+            pressure: float = None,
             rain_rate_in: float = None,
             rain_day_in: float = None,
             wind_speed_mph: float = None,
