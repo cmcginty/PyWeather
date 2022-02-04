@@ -48,6 +48,10 @@ class NoDeviceException(Exception):
     pass
 
 
+class NoNewRecordsException(Exception):
+    pass
+
+
 class VProCRC(object):
     """
     Implements CRC algorithm, necessary for encoding and verifying data from
@@ -546,6 +550,7 @@ class VantagePro(Station):
         returns a dictionary of fields from the newest archive record in the
         device. return None when no records are new.
         """
+        records = []
         for i in range(3):
             records = self._dmpaft_cmd(self._archive_time)
             if records is not None:
@@ -553,7 +558,7 @@ class VantagePro(Station):
             time.sleep(1)
 
         if records is None:
-            raise NoDeviceException('Can not access weather station')
+            raise NoNewRecordsException('Can not download any new record.')
 
         # find the newest record
         new_rec = None
@@ -593,6 +598,8 @@ class VantagePro(Station):
         data is parsed it is available in the fields variable.
         """
         fields = self._get_loop_fields()
+        # TODO: this will overwrite the last archived record with the newest record.
+        # Is this the expected behavior?
         fields['Archive'] = self._get_new_archive_fields()
 
         self._calc_derived_fields(fields)
