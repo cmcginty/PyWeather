@@ -1,4 +1,4 @@
-'''Base class for all Weather Station implementations.'''
+"""Base class for all Weather Station implementations."""
 
 import datetime
 import time as time_module
@@ -9,18 +9,18 @@ __all__ = ['WeatherPoint', 'Station']
 
 
 class WeatherPoint:
-    '''Represents a single weather measurement.
+    """Represents a single weather measurement.
 
     Can't use dataclass because we try to convert between celsius and
     Fahrenheit in flight here.
-    '''
+    """
     time: datetime.datetime = None
 
     _temperature_c: float = None  # Temperature in Celsius
     _temperature_f: float = None  # Temperature in Fahrenheit
     humidity: int = None  # Relative humidity in percent
     dew_point_f: float = None  # Dew point in Fahrenheit
-    pressure: int = None  # Atmosperic pressure
+    pressure: float = None  # Atmospheric pressure
 
     rain_rate_in: float = None  # Rain rate in inches
     rain_day_in: float = None  # Rain inches so far today
@@ -34,7 +34,7 @@ class WeatherPoint:
             temperature_f: float = None,
             humidity: int = None,
             dew_point_f: float = None,
-            pressure: int = None,
+            pressure: float = None,
             rain_rate_in: float = None,
             rain_day_in: float = None,
             wind_speed_mph: float = None,
@@ -96,8 +96,8 @@ class WeatherPoint:
 
 
 class Station:
-    '''Base class for all Weather Station implementations.'''
+    """Base class for all Weather Station implementations."""
 
     def get_reading(self) -> WeatherPoint:
-        '''Returns a single weather point.'''
+        """Returns a single weather point."""
         raise NotImplementedError('Not implemented')
