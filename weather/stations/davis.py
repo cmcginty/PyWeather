@@ -124,8 +124,7 @@ class VProCRC(object):
 class LoopStruct(Struct):
     """
     For unpacking data structure returned by the 'LOOP' command. this structure
-    contains all of the real-time data that can be read from the Davis Vantage
-    Pro.
+    contains all the real-time data that can be read from the Davis Vantage Pro.
     """
     FMT = (
         ('LOO', '3s'), ('BarTrend', 'B'), ('PacketType', 'B'),
@@ -153,8 +152,7 @@ class LoopStruct(Struct):
         items['TempOut'] = items['TempOut'] / 10.0
         items['RainRate'] = items['RainRate'] / 100.0
         items['RainStorm'] = items['RainStorm'] / 100.0
-        items['StormStartDate'] = self._unpack_storm_date(
-            items['StormStartDate'])
+        items['StormStartDate'] = self._unpack_storm_date(items['StormStartDate'])
         # rain totals
         items['RainDay'] = items['RainDay'] / 100.0
         items['RainMonth'] = items['RainMonth'] / 100.0
@@ -198,6 +196,7 @@ class _ArchiveStruct(object):
     """
     common features for both Rev.A and Rev.B structures.
     """
+    FMT = None
 
     def __init__(self):
         super(_ArchiveStruct, self).__init__(self.FMT, '=')
@@ -221,12 +220,12 @@ class _ArchiveStruct(object):
         return items
 
     @staticmethod
-    def _unpack_date_time(date, time):
+    def _unpack_date_time(date, t):
         day = date & 0x1f  # 5 bits
         month = (date >> 5) & 0x0f  # 4 bits
         year = ((date >> 9) & 0x7f) + 2000  # 7 bits
-        hour, min_ = divmod(time, 100)
-        return (year, month, day, hour, min_)
+        hour, min_ = divmod(t, 100)
+        return year, month, day, hour, min_
 
 
 # --------------------------------------------------------------------------- #
@@ -343,7 +342,14 @@ class VantagePro(Station):
     # archive format type, unknown
     _ARCHIVE_REV_B = None
 
-    def __init__(self, device, log_interval=5, logStartDate=None, clear=False):
+    def __init__(
+            self,
+            device,
+            meas_system='metric',
+            log_interval=5,
+            logStartDate=None,
+            clear=False
+    ):
         """
         Initialize the serial connection with the console.
         :param device: /dev/yourConsoleDevice
@@ -360,7 +366,7 @@ class VantagePro(Station):
         else:
             self._archive_time = (self.calcDateStamp(logStartDate),
                                   self.calcTimeStamp(logStartDate))
-        # Clear the whole archive if necessary. Default: no
+
         if clear:
             self._cmd('CLRLOG')  # prevent getting a full log dump at startup
         self._cmd('SETPER', log_interval, ok=True)
@@ -409,7 +415,7 @@ class VantagePro(Station):
 
         return self._ARCHIVE_REV_B
 
-    def _wakeup(self):
+    def _wakeup(self) -> None:
         """
         issue wakeup command to device to take out of standby mode.
         """
@@ -459,12 +465,11 @@ class VantagePro(Station):
 
     def _loop_cmd(self):
         """
-        reads a raw string containing data read from the device
-        provided (in /dev/XXX) format. all reads are non-blocking.
+        Reads a raw string containing data read from the device
+        provided (in /dev/XXX) format. All reads are non-blocking.
         """
         self._cmd('LOOP', 1)
         raw = self.port.read(LoopStruct.size)  # read data
-        # log_raw('read', raw)
         return raw
 
     def _dmpaft_cmd(self, time_fields):
@@ -481,21 +486,16 @@ class VantagePro(Station):
         # 2. send time stamp + crc
         crc = VProCRC.get(tbuf)
         crc = struct.pack('>H', crc)  # crc in big-endian format
-        # log_raw('send', tbuf + crc)
         self.port.write(tbuf + crc)  # send time stamp + crc
         ack = self.port.read(len(self.ACK))  # read ACK
-        # log_raw('read', ack)
         if ack.decode() != self.ACK:
             return None  # if bad ack, return None
 
         # 3. read pre-amble data
         raw = self.port.read(DmpStruct.size)
-        # log_raw('read', raw)
         if not VProCRC.verify(raw):  # check CRC value
-            # log_raw('send ESC', self.ESC)
             self.port.write(self.ESC)  # if bad, escape and abort
             return
-        # log_raw('send ACK', self.ACK)
         self.port.write(self.ACK.encode())  # send ACK
 
         # 4. loop through all page records
@@ -505,12 +505,9 @@ class VantagePro(Station):
         for i in range(dmp['Pages']):
             # 5. read page data
             raw = self.port.read(DmpPageStruct.size)
-            # log_raw('read', raw)
             if not VProCRC.verify(raw):  # check CRC value
-                # log_raw('send ESC', self.ESC)
                 self.port.write(self.ESC)  # if bad, escape and abort
                 return
-            # log_raw('send ACK', self.ACK)
             self.port.write(self.ACK.encode())  # send ACK
 
             # 6. loop through archive records
@@ -612,5 +609,3 @@ class VantagePro(Station):
         self.parse()
 
         return self._fields_to_weather_point()
-
-# vim: sts=4:ts=4:sw=4
