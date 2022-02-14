@@ -345,27 +345,26 @@ class VantagePro(Station):
     def __init__(
             self,
             device,
-            meas_system='metric',
             log_interval=5,
-            logStartDate=None,
+            log_start_date=None,
             clear=False
     ):
         """
         Initialize the serial connection with the console.
         :param device: /dev/yourConsoleDevice
         :param log_interval: default 5
-        :param logStartDate: the datetime.datetime object representing the
+        :param log_start_date: the datetime.datetime object representing the
             starting log date. Default None aka "all"
         :param clear: boolean, if true clean all the log in the console.
             Default False.
         """
         self.port = serial.Serial(device, BAUD, timeout=READ_DELAY)
         # set the logging interval to be downloaded. Default all
-        if logStartDate is None:
+        if log_start_date is None:
             self._archive_time = (0, 0)
         else:
-            self._archive_time = (self.calcDateStamp(logStartDate),
-                                  self.calcTimeStamp(logStartDate))
+            self._archive_time = (self.calcDateStamp(log_start_date),
+                                  self.calcTimeStamp(log_start_date))
 
         if clear:
             self._cmd('CLRLOG')  # prevent getting a full log dump at startup
@@ -601,7 +600,7 @@ class VantagePro(Station):
 
         self._calc_derived_fields(fields)
 
-        # set the fields variable the the values in the dict
+        # set the fields variable the values in the dict
         self.fields = fields
 
     def get_reading(self) -> WeatherPoint:
