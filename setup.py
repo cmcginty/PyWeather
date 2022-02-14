@@ -15,20 +15,20 @@
 
 import os
 from distutils.core import setup
+from pathlib import Path
 
 import weather as pkg
 name = pkg.__name__
 
-
-def _read(*path_name):
-    return open(os.path.join(os.path.dirname(__file__), *path_name)).read()
-
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 setup(name=name,
       version=pkg.__version__,
       license="GNU GPL",
       description=pkg.__doc__,
-      long_description=_read('README.md'),
+      long_description = long_description,
+      long_description_content_type="text/markdown",
       author="Patrick C. McGinty, Christopher Blunck",
       author_email="pyweather@tuxcoder.com, chris@wxnet.org",
       url="http://github.com/cmcginty/PyWeather",
