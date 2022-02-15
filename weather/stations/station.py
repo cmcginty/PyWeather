@@ -11,9 +11,6 @@ __all__ = ['WeatherPoint', 'Station']
 class WeatherPoint:
     """
     Represents a single weather measurement.
-
-    Can't use dataclass because we try to convert between celsius and
-    Fahrenheit in flight here.
     """
     time: datetime.datetime = None
 
@@ -31,6 +28,7 @@ class WeatherPoint:
 
     def __init__(
             self,
+            time=None,
             temperature_c: float = None,
             temperature_f: float = None,
             humidity: int = None,
@@ -40,7 +38,8 @@ class WeatherPoint:
             rain_day_in: float = None,
             wind_speed_mph: float = None,
             wind_direction: int = None,
-            time=None):
+            ):
+        self.time = time or time_module.gmtime()
         if temperature_c is not None and temperature_f is not None:
             raise ValueError('Only one of temperature_c and temperature_f can be passed.')
         if temperature_c is not None:
@@ -54,7 +53,6 @@ class WeatherPoint:
         self.rain_day_in = rain_day_in
         self.wind_speed_mph = wind_speed_mph
         self.wind_direction = wind_direction
-        self.time = time or time_module.gmtime()
 
     @property
     def temperature_f(self) -> float:
@@ -93,6 +91,9 @@ class WeatherPoint:
             self.wind_speed_mph == other.wind_speed_mph and
             self.wind_direction == other.wind_direction
         )
+
+    def __repr__(self):
+        return str(self.__dict__)
 
 
 class Station:
