@@ -295,25 +295,6 @@ ArchiveAStruct = _ArchiveAStruct()
 ArchiveBStruct = _ArchiveBStruct()
 
 
-def _fields_to_weather_point(fields: dict) -> WeatherPoint:
-    """Convert VantagePro fields dictionary to WeatherPoint.
-
-    Only supports limited subset of data available in self.fields -
-    generally only those useful for posting to weather services.
-    """
-    return WeatherPoint(
-        temperature_f=fields['TempOut'],
-        pressure=fields['Pressure'],
-        dew_point_f=fields['DewPoint'],
-        humidity=fields['HumOut'],
-        rain_rate_in=fields['RainRate'],
-        rain_day_in=fields['RainDay'],
-        time=dt.datetime.strptime(fields['DateStampUtc'], "%Y-%m-%d %H:%M:%S"),
-        wind_speed_mph=fields['WindSpeed10Min'],
-        wind_direction=fields['WindDir'],
-    )
-
-
 ##############################################################################
 # |--------------------------------------------------------------------------|#
 # |--------------------------------------------------------------------------|#
@@ -369,6 +350,8 @@ class VantagePro(Station):
         if clear:
             self._cmd('CLRLOG')  # prevent getting a full log dump at startup
         self._cmd('SETPER', log_interval, ok=True)
+
+        self.fields = {}
 
     def calcDateStamp(self, date):
         """
@@ -607,4 +590,23 @@ class VantagePro(Station):
         """Return a single weather reading."""
         self.parse()
 
-        return self._fields_to_weather_point()
+        return self._fields_to_weather_point(self.fields)
+
+    @staticmethod
+    def _fields_to_weather_point(fields: dict) -> WeatherPoint:
+        """Convert VantagePro fields dictionary to WeatherPoint.
+
+        Only supports limited subset of data available in self.fields -
+        generally only those useful for posting to weather services.
+        """
+        return WeatherPoint(
+            temperature_c=fahrenheit_to_celsius(fields['TempOut']),
+            pressure=fields['Pressure'],
+            dew_point_f=fields['DewPoint'],
+            humidity=fields['HumOut'],
+            rain_rate_in=fields['RainRate'],
+            rain_day_in=fields['RainDay'],
+            time=dt.datetime.strptime(fields['DateStampUtc'], "%Y-%m-%d %H:%M:%S"),
+            wind_speed_mph=fields['WindSpeed10Min'],
+            wind_direction=fields['WindDir'],
+        )
