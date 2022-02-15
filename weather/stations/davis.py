@@ -353,7 +353,8 @@ class VantagePro(Station):
 
         self.fields = {}
 
-    def calcDateStamp(self, date):
+    @staticmethod
+    def calcDateStamp(date):
         """
         As stated into the Vantage Serial Protocol manual, this method converts
         a datetime object into the right DateStamp
@@ -363,7 +364,8 @@ class VantagePro(Station):
         """
         return date.day + date.month * 32 + (date.year - 2000) * 512
 
-    def calcTimeStamp(self, date):
+    @staticmethod
+    def calcTimeStamp(date):
         """
         As stated into the Vantage Serial Protocol manual, this method converts
         a datetime object into the right TimeStamp.
