@@ -551,7 +551,8 @@ class VantagePro(Station):
 
         return new_rec
 
-    def _calc_derived_fields(self, fields):
+    @staticmethod
+    def _calc_derived_fields(fields):
         """
         calculates the derived fields (those fields that are calculated)
         """
