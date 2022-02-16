@@ -193,9 +193,9 @@ class LoopStruct(Struct):
 # --------------------------------------------------------------------------- #
 
 class _ArchiveStruct(object):
-    """
+    '''
     common features for both Rev.A and Rev.B structures.
-    """
+    '''
     FMT = None
 
     def __init__(self):
@@ -203,16 +203,15 @@ class _ArchiveStruct(object):
 
     def _post_unpack(self, items):
         vals = self._unpack_date_time(items['DateStamp'], items['TimeStamp'])
-        items.update(list(zip(('Year', 'Month', 'Day', 'Hour', 'Min'), vals)))
+        items.update(zip(('Year', 'Month', 'Day', 'Hour', 'Min'), vals))
         items['TempOut'] = items['TempOut'] / 10.0
         items['TempOutHi'] = items['TempOutHi'] / 10.0
         items['TempOutLow'] = items['TempOutLow'] / 10.0
-        items['Pressure'] = items['Pressure'] / 1000.0
+        items['Barometer'] = items['Barometer'] / 1000.0
         items['TempIn'] = items['TempIn'] / 10.0
         items['UV'] = items['UV'] / 10.0
+        items['UVHi'] = items['UVHi'] / 10.0
         items['ETHour'] = items['ETHour'] / 1000.0
-        items['WindHiDir'] = int(items['WindHiDir'] * 22.5)
-        items['WindHiDir'] = int(items['WindAvgDir'] * 22.5)
         items['SoilTemps'] = tuple(
             t - 90 for t in struct.unpack('4B', items['SoilTemps']))
         items['ExtraHum'] = struct.unpack('2B', items['ExtraHum'])
@@ -220,12 +219,12 @@ class _ArchiveStruct(object):
         return items
 
     @staticmethod
-    def _unpack_date_time(date, t):
+    def _unpack_date_time(date, time_):
         day = date & 0x1f  # 5 bits
         month = (date >> 5) & 0x0f  # 4 bits
         year = ((date >> 9) & 0x7f) + 2000  # 7 bits
-        hour, min_ = divmod(t, 100)
-        return year, month, day, hour, min_
+        hour, min_ = divmod(time_, 100)
+        return (year, month, day, hour, min_)
 
 
 # --------------------------------------------------------------------------- #
@@ -255,17 +254,82 @@ class _ArchiveAStruct(_ArchiveStruct, Struct):
 # --------------------------------------------------------------------------- #
 
 class _ArchiveBStruct(_ArchiveStruct, Struct):
+    '''
+    This represents the structure of the Archive Packet (RevB) returned by the station with the DMPAFT command
+    '''
     FMT = (
-        ('DateStamp', 'H'), ('TimeStamp', 'H'), ('TempOut', 'H'),
-        ('TempOutHi', 'H'), ('TempOutLow', 'H'), ('RainRate', 'H'),
-        ('RainRateHi', 'H'), ('Pressure', 'H'), ('SolarRad', 'H'),
-        ('WindSamps', 'H'), ('TempIn', 'H'), ('HumIn', 'B'),
-        ('HumOut', 'B'), ('WindAvg', 'B'), ('WindHi', 'B'),
-        ('WindHiDir', 'B'), ('WindAvgDir', 'B'), ('UV', 'B'),
-        ('ETHour', 'B'), ('SolarRadHi', 'H'), ('UVHi', 'B'),
-        ('ForecastRuleNo', 'B'), ('LeafTemps', '2s'), ('LeafWetness', '2s'),
-        ('SoilTemps', '4s'), ('RecType', 'B'), ('ExtraHum', '2s'),
-        ('ExtraTemps', '3s'), ('SoilMoist', '4s'),
+        # These 16 bits hold the date that the archive was written in the following format:
+        # Year (7 bits) | Month (4 bits) | Day (5 bits) or: day + month*32 + (year-2000)*512)
+        ('DateStamp', 'H'),
+        # Time on the Vantage that the archive record was
+        # written:
+        # (Hour * 100) + minute.
+        ('TimeStamp', 'H'),
+        # Either the Average Outside Temperature, or the
+        # Final Outside Temperature over the archive period.
+        # Units are (F / 10)
+        ('TempOut', 'H'),
+        # Highest Outside Temp over the archive period.
+        ('TempOutHi', 'H'),
+        # Lowest Outside Temp over the archive period.
+        ('TempOutLow', 'H'),
+        # Number of rain clicks over the archive period
+        ('RainRate', 'H'),
+        # Highest rain rate over the archive period, or the rate
+        # shown on the console at the end of the period if there
+        # was no rain. Units are (rain clicks / hour)
+        ('RainRateHi', 'H'),
+        # Barometer reading at the end of the archive period.
+        # Units are (in Hg / 1000).
+        ('Barometer', 'H'),
+        # Average Solar Rad over the archive period.
+        # Units are (Watts / m 2 )
+        ('SolarRad', 'H'),
+        # Number of packets containing wind speed data
+        # received from the ISS or wireless anemometer.
+        ('WindSamps', 'H'),
+        # Either the Average Inside Temperature, or the Final
+        # Inside Temperature over the archive period. Units
+        # are (F / 10)
+        ('TempIn', 'H'),
+        # Inside Humidity at the end of the archive period
+        ('HumIn', 'B'),
+        # Outside Humidity at the end of the archive period
+        ('HumOut', 'B'),
+        # Average Wind Speed over the archive interval. Units are (MPH)
+        ('WindAvg', 'B'),
+        # Highest Wind Speed over the archive interval. Units are (MPH)
+        ('WindHi', 'B'),
+        # Direction code of the High Wind speed. 0 = N, 1 = NNE, 2 = NE, ... 14 = NW, 15 = NNW, 255 = Dashed
+        ('WindHiDir', 'B'),
+        # Prevailing or Dominant Wind Direction code.
+        # 0 = N, 1 = NNE, 2 = NE, ... 14 = NW, 15 = NNW, 255 = Dashed Firmware
+        # before July 8, 2001 does not report direction code 255
+        ('WindAvgDir', 'B'),
+        # Average UV Index. Units are (UV Index / 10)
+        ('UV', 'B'),
+        # ET accumulated over the last hour. Only records "on the hour" will have a non-zero value. Units are (in /1000)
+        ('ETHour', 'B'),
+        # Highest Solar Rad value over the archive period. Units are (Watts / m 2)
+        ('SolarRadHi', 'H'),
+        # Highest UV Index value over the archive period.
+        ('UVHi', 'B'),
+        # Weather forecast rule at the end of the archive period.
+        ('ForecastRuleNo', 'B'),
+        # 2 Leaf Temperature values. Units are (F + 90)
+        ('LeafTemps', '2s'),
+        # 2 Leaf Wetness values. Range is 0-15
+        ('LeafWetness', '2s'),
+        # 4 Soil Temperatures. Units are (F + 90)
+        ('SoilTemps', '4s'),
+        # 0xFF = Rev A, 0x00 = Rev B archive record
+        ('RecType', 'B'),
+        # 2 Extra Humidity values
+        ('ExtraHum', '2s'),
+        # 3 Extra Temperature values. Units are (F + 90)
+        ('ExtraTemps', '3s'),
+        # 4 Soil Moisture values. Units are (cb)
+        ('SoilMoist', '4s'),
     )
 
     def _post_unpack(self, items):
@@ -289,10 +353,31 @@ DmpPageStruct = Struct(
     (('Index', 'B'), ('Records', '260s'), ('unused', '4B'), ('CRC', 'H')),
     order='=')
 
+
+class _TimeStruct(Struct):
+    FMT = (
+        ('Sec', 'B'),
+        ('Min', 'B'),
+        ('Hour', 'B'),
+        ('Day', 'B'),
+        ('Month', 'B'),
+        ('Year', 'B'),
+        ('CRC', 'H'),
+    )
+
+    def __init__(self):
+        super(_TimeStruct, self).__init__(self.FMT, '=')
+
+    def _post_unpack(self, items):
+        items['Year'] = items['Year'] + 1900
+        return items
+
+
 # init structure classes
 LoopStruct = LoopStruct()
 ArchiveAStruct = _ArchiveAStruct()
 ArchiveBStruct = _ArchiveBStruct()
+timeStruct = _TimeStruct()
 
 
 ##############################################################################
@@ -514,6 +599,7 @@ class VantagePro(Station):
         return records
 
     def _get_loop_fields(self):
+        crc_ok = None
         for i in range(3):
             raw = self._loop_cmd()  # read raw data
             crc_ok = VProCRC.verify(raw)
