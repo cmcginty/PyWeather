@@ -8,7 +8,6 @@
 # -Christopher Blunck
 #
 
-import sys
 
 __author__ = 'Christopher Blunck'
 __email__ = 'chris@wxnet.org'
@@ -61,6 +60,22 @@ def in60_to_atm(inches):
 def in60_to_lbs(inches):
     'Inches of mercury @60F (inHg60) to pounds/square inch (lb/in**2)'
     return inches * 0.48977
+
+def incConv_to_Pa(inches):
+    '''
+    Inches of mercury to Pascals using the NIST conventional coefficient
+    :param inches: inches of mg
+    :return: pascals
+    '''
+    return inches * 3.386389
+
+def incConv_to_kPa(inches):
+    '''
+    Inches of mercury to kilo Pascals using the NIST conventional coefficient
+    :param inches: inches of mg
+    :return: pascals
+    '''
+    return incConv_to_Pa(inches)*1000
 
 def mb_to_atm(mb):
     'Millibars (mb) to atmospheres (atm)'
