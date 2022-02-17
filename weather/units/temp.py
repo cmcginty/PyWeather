@@ -141,3 +141,18 @@ def calc_dewpoint(temp, hum):
     dewpoint = c - dewpoint
 
     return celsius_to_fahrenheit(dewpoint)
+
+
+def calc_dewpoint_davis(temp, hum):
+    '''
+    calculate the dewpoint via the formula used by Davis. See Davis Application Note 28 - Derived Variables in Davis
+    Weather Products.
+    :author: Paolo Bellagente (p.bellagente@unibs.it - 23/03/2017
+    :param temp: Outside temperature in F
+    :param hum: Relative outside humidity
+    :return: the dewpoint in F
+    '''
+    v = hum * 0.01 * 6.112 * math.exp((17.62 * temp) / (temp + 243.12))
+    n = 243.12 * (math.log(v)) - 440.1
+    d = 19.43 - math.log(v)
+    return n / d
