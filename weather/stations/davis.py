@@ -689,7 +689,7 @@ class VantagePro(Station):
         generally only those useful for posting to weather services.
         """
         return WeatherPoint(
-            temperature_c=fahrenheit_to_celsius(fields['TempOut']),
+            temperature_f=fields['TempOut'],
             pressure=fields['Pressure'],
             dew_point_f=fields['DewPoint'],
             humidity=fields['HumOut'],
