@@ -193,9 +193,9 @@ class LoopStruct(Struct):
 # --------------------------------------------------------------------------- #
 
 class _ArchiveStruct(object):
-    '''
+    """
     common features for both Rev.A and Rev.B structures.
-    '''
+    """
     FMT = None
 
     def __init__(self):
@@ -224,7 +224,7 @@ class _ArchiveStruct(object):
         month = (date >> 5) & 0x0f  # 4 bits
         year = ((date >> 9) & 0x7f) + 2000  # 7 bits
         hour, min_ = divmod(time_, 100)
-        return (year, month, day, hour, min_)
+        return year, month, day, hour, min_
 
 
 # --------------------------------------------------------------------------- #
@@ -254,9 +254,9 @@ class _ArchiveAStruct(_ArchiveStruct, Struct):
 # --------------------------------------------------------------------------- #
 
 class _ArchiveBStruct(_ArchiveStruct, Struct):
-    '''
+    """
     This represents the structure of the Archive Packet (RevB) returned by the station with the DMPAFT command
-    '''
+    """
     FMT = (
         # These 16 bits hold the date that the archive was written in the following format:
         # Year (7 bits) | Month (4 bits) | Day (5 bits) or: day + month*32 + (year-2000)*512)
@@ -303,14 +303,14 @@ class _ArchiveBStruct(_ArchiveStruct, Struct):
         # Direction code of the High Wind speed. 0 = N, 1 = NNE, 2 = NE, ... 14 = NW, 15 = NNW, 255 = Dashed
         ('WindHiDir', 'B'),
         # Prevailing or Dominant Wind Direction code.
-        # 0 = N, 1 = NNE, 2 = NE, ... 14 = NW, 15 = NNW, 255 = Dashed Firmware
-        # before July 8, 2001 does not report direction code 255
+        # 0 = N, 1 = NNE, 2 = NE, ... 14 = NW, 15 = NNW, 255 = Dashed
+        # Firmware before July 8th 2001 does not report direction code 255
         ('WindAvgDir', 'B'),
         # Average UV Index. Units are (UV Index / 10)
         ('UV', 'B'),
         # ET accumulated over the last hour. Only records "on the hour" will have a non-zero value. Units are (in /1000)
         ('ETHour', 'B'),
-        # Highest Solar Rad value over the archive period. Units are (Watts / m 2)
+        # Highest Solar Rad's value over the archive period. Units are (Watts / m 2)
         ('SolarRadHi', 'H'),
         # Highest UV Index value over the archive period.
         ('UVHi', 'B'),
@@ -643,13 +643,13 @@ class VantagePro(Station):
         calculates the derived fields (those fields that are calculated)
         """
         # convenience variables for the calculations below
-        temp = fields['TempOut']
+        temp_ = fields['TempOut']
         hum = fields['HumOut']
-        wind = fields['WindSpeed']
+        wind_ = fields['WindSpeed']
         wind10min = fields['WindSpeed10Min']
-        fields['HeatIndex'] = calc_heat_index(temp, hum)
-        fields['WindChill'] = calc_wind_chill(temp, wind, wind10min)
-        fields['DewPoint'] = calc_dewpoint(temp, hum)
+        fields['HeatIndex'] = calc_heat_index(temp_, hum)
+        fields['WindChill'] = calc_wind_chill(temp_, wind_, wind10min)
+        fields['DewPoint'] = calc_dewpoint(temp_, hum)
         # store current data string
         now = time.localtime()
         fields['DateStamp'] = time.strftime("%Y-%m-%d %H:%M:%S", now)

@@ -36,7 +36,7 @@ class Struct(struct.Struct):
 
     def unpack_from(self, buf, offset=0):
         """
-        unpacks data from 'buf' and returns a dication of named fields. the
+        unpacks data from 'buf' and returns a dictation of named fields. the
         fields can be post-processed by extending the _post_unpack() method.
         """
         data = super(Struct, self).unpack_from(buf, offset)
