@@ -15,6 +15,9 @@ distance, temperature, pressure, and volume.  Conversion from
 Fahrenheit to Celsius, and kelvin is supported, as well as conversions
 between inches of mercury and millibars.
 
+## Wind Chill Factor Calculation
+
+PyWeather now includes a feature to calculate the wind chill factor based on temperature and wind speed. This provides users with additional information about how cold it feels outside, which is particularly useful in cold weather conditions.
 
 ## Station Observations
 
@@ -53,7 +56,7 @@ For additional information, please email the maintainer:
     to push data to.
 5.  Configure weather station and publication service in corresponding sections
     of the configuration file (see below for more details).
-3.  Run it: `./scripts/weatherpub.py -c scripts/weatherpub.conf`
+6.  Run it: `./scripts/weatherpub.py -c scripts/weatherpub.conf`
 
 ### Weather stations
 
@@ -83,3 +86,6 @@ Only 3 publication service are currently supported. Out of them only PWS Weather
 1.  [Create PWS Weather profile](https://www.pwsweather.com/register).
 2.  Go to your [dashboard](https://dashboard.pwsweather.com/) and [create a station](https://dashboard.pwsweather.com/stations/add).
 3.  In `[pwsweather]` section of the configuration file use your station id as `site_id`, and password from account you created at step 1 as `password`.
+
+#### Wind Chill Factor Calculation
+The wind chill factor is calculated based on temperature and wind speed. This feature is integrated into the weather report functionality, providing users with additional information about how cold it feels outside. The calculation is only defined for temperatures at or below 10°C (50°F) and wind speeds above 4.8 km/h (3 mph).
