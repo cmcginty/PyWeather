@@ -92,11 +92,11 @@ The wind chill factor is calculated based on temperature and wind speed. This fe
 
 Example usage in the script:
 
-''''
+'''
 temperature = 5  # in Celsius
 wind_speed = 15  # in km/h
 wind_chill = calculate_wind_chill(temperature, wind_speed)
 print(f"The wind chill factor is: {wind_chill}°C")
-''''
+'''
 
 This updated documentation reflects the new functionality added to PyWeather, including the wind chill factor calculation, and provides clear instructions on how to use the new feature.
