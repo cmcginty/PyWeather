@@ -89,3 +89,14 @@ Only 3 publication service are currently supported. Out of them only PWS Weather
 
 #### Wind Chill Factor Calculation
 The wind chill factor is calculated based on temperature and wind speed. This feature is integrated into the weather report functionality, providing users with additional information about how cold it feels outside. The calculation is only defined for temperatures at or below 10°C (50°F) and wind speeds above 4.8 km/h (3 mph).
+
+Example usage in the script:
+
+''''
+temperature = 5  # in Celsius
+wind_speed = 15  # in km/h
+wind_chill = calculate_wind_chill(temperature, wind_speed)
+print(f"The wind chill factor is: {wind_chill}°C")
+''''
+
+This updated documentation reflects the new functionality added to PyWeather, including the wind chill factor calculation, and provides clear instructions on how to use the new feature.
