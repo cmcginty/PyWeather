@@ -238,3 +238,30 @@ if __name__ == '__main__':
         next_update = opts.interval - (time.time() % opts.interval)
         log.info('sleep')
         time.sleep(next_update)
+
+
+def calculate_wind_chill(temperature, wind_speed):
+    """
+    Calculate the wind chill factor based on temperature and wind speed.
+    Wind chill is only defined for temperatures at or below 10°C (50°F) and wind speeds above 4.8 km/h (3 mph).
+    """
+    if temperature > 10 or wind_speed <= 4.8:
+        return temperature
+
+    wind_chill = 13.12 + 0.6215 * temperature - 11.37 * (wind_speed ** 0.16) + 0.3965 * temperature * (wind_speed ** 0.16)
+    return round(wind_chill, 2)
+
+
+def generate_weather_report(temperature, wind_speed, other_data):
+    """
+    Generate a weather report including temperature, wind speed, and wind chill factor.
+    """
+    wind_chill = calculate_wind_chill(temperature, wind_speed)
+    report = {
+        'temperature': temperature,
+        'wind_speed': wind_speed,
+        'wind_chill': wind_chill,
+        # Include other weather data as needed
+        **other_data
+    }
+    return report
